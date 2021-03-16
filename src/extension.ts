@@ -1,40 +1,21 @@
 import * as vscode from "vscode";
-import { ConfigUtils } from "./utilities/config-utils";
+import { Project } from "ts-morph";
+import { CommandMap } from "./constants/command-map";
+import { ProjectUtils } from "./utilities/project-utils";
 import { ToastUtils } from "./utilities/toast-utils";
+import { addKeyToInterface } from "./commands/add-key-to-interface";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const activate = (context: vscode.ExtensionContext) => {
-    let disposable = vscode.commands.registerCommand(
-        "i18n-ext.helloWorld",
-        command
-    );
-
-    context.subscriptions.push(disposable);
-};
-
-const command = async () => {
-    const config = ConfigUtils.get();
-
-    const interfacePath = (
-        await vscode.workspace.findFiles(
-            config.cultureInterfacePath,
-            "**/node_modules/**",
-            1
-        )
-    )[0];
-
-    if (interfacePath == null) {
-        ToastUtils.error(
-            `Error - culture interface could not be found matching path ${config.cultureInterfacePath}. Please check the path in your settings.`
+const activate = async (context: vscode.ExtensionContext) => {
+    await ProjectUtils.initializeFromConfig();
+    Object.keys(CommandMap).forEach((command: string) => {
+        context.subscriptions.push(
+            vscode.commands.registerCommand(command, CommandMap[command])
         );
-
-        return;
-    }
-
-    ToastUtils.info(`Found culture interface - ${interfacePath.toString()}`);
+    });
 };
 
 const deactivate = () => {};

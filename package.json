@@ -10,7 +10,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:i18n-ext.helloWorld"
+        "onCommand:i18n-ext.addKeyToInterface"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -35,8 +35,8 @@
         },
         "commands": [
             {
-                "command": "i18n-ext.helloWorld",
-                "title": "i18n-ext: Hello World"
+                "command": "i18n-ext.addKeyToInterface",
+                "title": "i18n-ext: Add key to interface"
             }
         ]
     },
@@ -61,5 +61,8 @@
         "prettier": "2.2.1",
         "typescript": "4.1.3",
         "vscode-test": "1.5.0"
+    },
+    "dependencies": {
+        "ts-morph": "10.0.1"
     }
 }
