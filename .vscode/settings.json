@@ -1,11 +1,36 @@
-// Place your settings in this file to overwrite default and user settings.
 {
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp"
+    },
+    "[scss]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "csharp.format.enable": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.rulers": [100],
     "files.exclude": {
         "out": false // set this to true to hide the "out" folder with the compiled JS files
     },
+    "json.schemas": [
+        {
+            "fileMatch": ["cypress.json"],
+            "url": "https://on.cypress.io/cypress.schema.json"
+        }
+    ],
+    "prettier.requireConfig": true,
     "search.exclude": {
         "out": true // set this to false to include "out" folder in search results
     },
+    "trailing-spaces.trimOnSave": true,
+    "typescript.preferences.quoteStyle": "double",
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off"
+    "typescript.tsc.autoDetect": "off",
+    "typescript.tsdk": "./frontend/node_modules/typescript/lib"
 }
