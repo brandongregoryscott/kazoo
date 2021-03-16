@@ -1,27 +1,50 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { ConfigUtils } from "./utilities/config-utils";
+import { ToastUtils } from "./utilities/toast-utils";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+// -----------------------------------------------------------------------------------------
+// #region Public Functions
+// -----------------------------------------------------------------------------------------
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "i18n-ext" is now active!');
+const activate = (context: vscode.ExtensionContext) => {
+    let disposable = vscode.commands.registerCommand(
+        "i18n-ext.helloWorld",
+        command
+    );
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('i18n-ext.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+    context.subscriptions.push(disposable);
+};
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from i18n-ext!');
-	});
+const command = async () => {
+    const config = ConfigUtils.get();
 
-	context.subscriptions.push(disposable);
-}
+    const interfacePath = (
+        await vscode.workspace.findFiles(
+            config.cultureInterfacePath,
+            "**/node_modules/**",
+            1
+        )
+    )[0];
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+    if (interfacePath == null) {
+        ToastUtils.error(
+            `Error - culture interface could not be found matching path ${config.cultureInterfacePath}. Please check the path in your settings.`
+        );
+
+        return;
+    }
+
+    ToastUtils.info(`Found culture interface - ${interfacePath.toString()}`);
+};
+
+const deactivate = () => {};
+
+// #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Exports
+// -----------------------------------------------------------------------------------------
+
+export { activate, deactivate };
+
+// #endregion Exports
