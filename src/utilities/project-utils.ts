@@ -1,13 +1,16 @@
 import { Project, SourceFile } from "ts-morph";
 import { ConfigUtils } from "./config-utils";
-import * as vscode from "vscode";
 import { ToastUtils } from "./toast-utils";
+import { FileUtils } from "./file-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
 const config = ConfigUtils.get();
+const ERROR_CULTURE_FILES_NOT_FOUND = `Error - no culture files could be found matching patterns ${JSON.stringify(
+    config.cultureFilePaths
+)}. Please check the paths in your settings.`;
 const ERROR_CULTURE_INTERFACE_NOT_FOUND = `Error - culture interface could not be found matching path ${config.cultureInterfacePath}. Please check the path in your settings.`;
 
 // #endregion Constants
@@ -56,33 +59,11 @@ const initializeFromConfig = async (): Promise<Project> => {
 // -----------------------------------------------------------------------------------------
 
 const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
-    let resolvedPaths: string[] | undefined;
-    config.cultureFilePaths.forEach(async (path: string) => {
-        const uris = await vscode.workspace.findFiles(
-            path,
-            "**/node_modules/**"
-        );
-
-        if (uris.length <= 0) {
-            return;
-        }
-
-        const fsPaths = uris.map((uri) => uri.fsPath);
-        if (resolvedPaths == null) {
-            resolvedPaths = fsPaths;
-            return;
-        }
-
-        resolvedPaths = [...resolvedPaths, ...fsPaths];
-    });
+    const resolvedPaths = await FileUtils.findAll(config.cultureFilePaths);
 
     // BSCOTT - is this the right place to be handling errors?
-    if (resolvedPaths == null) {
-        ToastUtils.error(
-            `Error - no culture files could be found matching patterns ${JSON.stringify(
-                config.cultureFilePaths
-            )}. Please check the paths in your settings.`
-        );
+    if (resolvedPaths.length <= 0) {
+        ToastUtils.error(ERROR_CULTURE_FILES_NOT_FOUND);
 
         return undefined;
     }
@@ -91,22 +72,16 @@ const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
 };
 
 const _getCultureInterfacePath = async (): Promise<string | undefined> => {
-    const uri = await (
-        await vscode.workspace.findFiles(
-            config.cultureInterfacePath,
-            "**/node_modules/**",
-            1
-        )
-    )[0];
+    const path = await FileUtils.findFirst(config.cultureInterfacePath);
 
     // BSCOTT - is this the right place to be handling errors?
-    if (uri == null) {
+    if (path == null) {
         ToastUtils.error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
 
         return undefined;
     }
 
-    return uri.fsPath;
+    return path;
 };
 
 // #endregion Private Functions
