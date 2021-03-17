@@ -10,14 +10,8 @@ import { PropertySignature } from "ts-morph";
 // -----------------------------------------------------------------------------------------
 
 const addKeyToInterface = async () => {
-    const cultureInterfaceFile = await ProjectUtils.getCultureInterface();
-
-    // Refreshing from file system incase extension has previously modified file
-    await cultureInterfaceFile.refreshFromFileSystem();
-
-    const cultureInterface = cultureInterfaceFile.getChildrenOfKind(
-        SyntaxKind.InterfaceDeclaration
-    )[0];
+    const cultureInterfaceFile = await ProjectUtils.getCultureInterfaceFile();
+    const cultureInterface = await ProjectUtils.getCultureInterface();
 
     const key = await vscode.window.showInputBox({
         prompt: `Enter a key to insert into ${cultureInterface.getName()}`,
@@ -28,7 +22,7 @@ const addKeyToInterface = async () => {
     }
 
     const properties = cultureInterface.getProperties();
-    const existingProperty = findExistingProperty(key, properties);
+    const existingProperty = _findExistingProperty(key, properties);
     if (existingProperty != null) {
         ToastUtils.error(
             `Error - key '${key}' already exists in ${cultureInterface.getName()}:L${existingProperty.getStartLineNumber()}`
@@ -36,9 +30,9 @@ const addKeyToInterface = async () => {
         return;
     }
 
-    const index = findAlphabeticalIndex(key, properties);
+    const index = _findAlphabeticalIndex(key, properties);
     const newProperty = cultureInterface.insertProperty(index, {
-        name: quoteEscapeKey(key),
+        name: _quoteEscapeKey(key),
         type: "string",
     });
 
@@ -55,11 +49,11 @@ const addKeyToInterface = async () => {
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const findAlphabeticalIndex = (
+const _findAlphabeticalIndex = (
     key: string,
     properties: PropertySignature[]
 ): number => {
-    const propertyNames = stripPropertyNamesOfQuotes(properties);
+    const propertyNames = _stripPropertyNamesOfQuotes(properties);
 
     propertyNames.push(key);
 
@@ -68,18 +62,18 @@ const findAlphabeticalIndex = (
         .findIndex((propertyName) => propertyName === key);
 };
 
-const findExistingProperty = (
+const _findExistingProperty = (
     key: string,
     properties: PropertySignature[]
 ): PropertySignature | undefined => {
-    const index = stripPropertyNamesOfQuotes(properties).findIndex(
+    const index = _stripPropertyNamesOfQuotes(properties).findIndex(
         (propertyName) => propertyName === key
     );
 
     return properties[index];
 };
 
-const stripPropertyNamesOfQuotes = (
+const _stripPropertyNamesOfQuotes = (
     properties: PropertySignature[]
 ): string[] =>
     properties.map((property) =>
@@ -88,7 +82,7 @@ const stripPropertyNamesOfQuotes = (
     );
 
 // BSCOTT - This might need to be a configuration setting
-const quoteEscapeKey = (key: string) => {
+const _quoteEscapeKey = (key: string) => {
     if (!key.startsWith(`"`)) {
         key = `"${key}`;
     }

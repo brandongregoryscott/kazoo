@@ -10,7 +10,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:i18n-ext.addKeyToInterface"
+        "onCommand:i18n-ext.addKeyToInterface",
+        "onCommand:i18n-ext.addTranslationToCultureFiles"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -37,6 +38,10 @@
             {
                 "command": "i18n-ext.addKeyToInterface",
                 "title": "i18n-ext: Add key to interface"
+            },
+            {
+                "command": "i18n-ext.addTranslationToCultureFiles",
+                "title": "i18n-ext: Add translation to culture files"
             }
         ]
     },

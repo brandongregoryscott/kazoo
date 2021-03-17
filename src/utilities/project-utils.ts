@@ -1,4 +1,4 @@
-import { Project, SourceFile } from "ts-morph";
+import { InterfaceDeclaration, Project, SourceFile } from "ts-morph";
 import { ConfigUtils } from "./config-utils";
 import { ToastUtils } from "./toast-utils";
 import { FileUtils } from "./file-utils";
@@ -35,16 +35,23 @@ const getCultureFiles = async (): Promise<SourceFile[]> => {
         throw new Error(ERROR_CULTURE_FILES_NOT_FOUND);
     }
 
-    return _project.getSourceFiles(paths);
+    const files = _project.getSourceFiles(paths);
+    await Promise.all(files.map((file) => file.refreshFromFileSystem()));
+    return files;
 };
 
-const getCultureInterface = async (): Promise<SourceFile> => {
+const getCultureInterface = async (): Promise<InterfaceDeclaration> =>
+    await (await getCultureInterfaceFile()).getInterfaces()[0];
+
+const getCultureInterfaceFile = async (): Promise<SourceFile> => {
     const path = await _getCultureInterfacePath();
     if (path == null) {
         throw new Error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
     }
 
-    return _project.getSourceFileOrThrow(path);
+    const file = _project.getSourceFileOrThrow(path);
+    await file.refreshFromFileSystem();
+    return file;
 };
 
 const initializeFromConfig = async (): Promise<Project> => {
@@ -103,6 +110,7 @@ export const ProjectUtils = {
     get,
     getCultureFiles,
     getCultureInterface,
+    getCultureInterfaceFile,
     initializeFromConfig,
 };
 
