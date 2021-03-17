@@ -29,6 +29,15 @@ let _project: Project = new Project();
 
 const get = (): Project => _project;
 
+const getCultureFiles = async (): Promise<SourceFile[]> => {
+    const paths = await _getCultureFilePaths();
+    if (paths == null) {
+        throw new Error(ERROR_CULTURE_FILES_NOT_FOUND);
+    }
+
+    return _project.getSourceFiles(paths);
+};
+
 const getCultureInterface = async (): Promise<SourceFile> => {
     const path = await _getCultureInterfacePath();
     if (path == null) {
@@ -92,6 +101,7 @@ const _getCultureInterfacePath = async (): Promise<string | undefined> => {
 
 export const ProjectUtils = {
     get,
+    getCultureFiles,
     getCultureInterface,
     initializeFromConfig,
 };
