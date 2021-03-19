@@ -1,6 +1,6 @@
 import { InterfaceDeclaration, Project, SourceFile } from "ts-morph";
 import { ConfigUtils } from "./config-utils";
-import { ToastUtils } from "./toast-utils";
+import { WindowUtils } from "./window-utils";
 import { FileUtils } from "./file-utils";
 
 // -----------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
 
     // BSCOTT - is this the right place to be handling errors?
     if (resolvedPaths.length <= 0) {
-        ToastUtils.error(ERROR_CULTURE_FILES_NOT_FOUND);
+        WindowUtils.error(ERROR_CULTURE_FILES_NOT_FOUND);
 
         return undefined;
     }
@@ -92,7 +92,7 @@ const _getCultureInterfacePath = async (): Promise<string | undefined> => {
 
     // BSCOTT - is this the right place to be handling errors?
     if (path == null) {
-        ToastUtils.error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
+        WindowUtils.error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
 
         return undefined;
     }

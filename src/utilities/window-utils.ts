@@ -5,10 +5,10 @@ import * as vscode from "vscode";
 // -----------------------------------------------------------------------------------------
 
 const error = (value: string | object) =>
-    _showToast(value, vscode.window.showErrorMessage);
+    _showMessage(value, vscode.window.showErrorMessage);
 
 const info = (value: string | object) =>
-    _showToast(value, vscode.window.showInformationMessage);
+    _showMessage(value, vscode.window.showInformationMessage);
 
 // #endregion Public Functions
 
@@ -16,7 +16,7 @@ const info = (value: string | object) =>
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const _showToast = (
+const _showMessage = (
     value: string | object,
     fn: (message: string, ...items: string[]) => Thenable<string | undefined>
 ) => {
@@ -33,7 +33,7 @@ const _showToast = (
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export const ToastUtils = {
+export const WindowUtils = {
     error,
     info,
 };

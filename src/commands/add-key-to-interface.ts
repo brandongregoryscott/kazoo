@@ -1,5 +1,5 @@
 import { ConfigUtils } from "../utilities/config-utils";
-import { ToastUtils } from "../utilities/toast-utils";
+import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
 import { SyntaxKind } from "@ts-morph/common";
@@ -24,7 +24,7 @@ const addKeyToInterface = async () => {
     const properties = cultureInterface.getProperties();
     const existingProperty = _findExistingProperty(key, properties);
     if (existingProperty != null) {
-        ToastUtils.error(
+        WindowUtils.error(
             `Error - key '${key}' already exists in ${cultureInterface.getName()}:L${existingProperty.getStartLineNumber()}`
         );
         return;
@@ -38,7 +38,7 @@ const addKeyToInterface = async () => {
 
     await cultureInterfaceFile.save();
 
-    ToastUtils.info(
+    WindowUtils.info(
         `Key '${key}' successfully added to ${cultureInterface.getName()}:L${newProperty.getStartLineNumber()}`
     );
 };
