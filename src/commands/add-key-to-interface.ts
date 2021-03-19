@@ -1,8 +1,6 @@
-import { ConfigUtils } from "../utilities/config-utils";
 import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { SyntaxKind } from "@ts-morph/common";
 import { PropertySignature } from "ts-morph";
 
 // -----------------------------------------------------------------------------------------
@@ -41,6 +39,8 @@ const addKeyToInterface = async () => {
     WindowUtils.info(
         `Key '${key}' successfully added to ${cultureInterface.getName()}:L${newProperty.getStartLineNumber()}`
     );
+
+    return key;
 };
 
 // #endregion Public Functions
