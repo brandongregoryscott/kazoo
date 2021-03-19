@@ -44,6 +44,17 @@ const isObjectLiteralExpressionWithProperty = (
 ): node is ObjectLiteralExpression =>
     Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
 
+const sortAndReplaceProperties = (
+    literal: ObjectLiteralExpression
+): ObjectLiteralExpression => {
+    const existing = getPropertyAssignments(literal);
+    const sorted = alphabetizeProperties(existing);
+    existing.forEach((property) => property.remove());
+    literal.addProperties(sorted);
+
+    return literal;
+};
+
 const shouldQuoteEscapeNewProperty = (
     name: string,
     existing: PropertyAssignment[]
@@ -76,6 +87,7 @@ export const NodeUtils = {
     findObjectLiteralExpressionWithProperty,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
+    sortAndReplaceProperties,
     shouldQuoteEscapeNewProperty,
 };
 
