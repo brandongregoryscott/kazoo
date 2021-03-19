@@ -5,6 +5,7 @@
 interface ExtensionConfiguration {
     cultureFilePaths: string[];
     cultureInterfacePath: string;
+    insertionPosition: InsertionPosition;
 }
 
 // #endregion Interfaces

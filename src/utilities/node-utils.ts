@@ -3,23 +3,13 @@ import {
     ObjectLiteralExpression,
     PropertyAssignment,
     PropertyAssignmentStructure,
+    PropertySignature,
+    PropertySignatureStructure,
 } from "ts-morph";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
-
-const alphabetizeProperties = (
-    properties: PropertyAssignment[]
-): PropertyAssignmentStructure[] =>
-    properties
-        .sort((a, b) =>
-            a
-                .getName()
-                .replace(/['"]/g, "")
-                .localeCompare(b.getName().replace(/['"]/g, ""))
-        )
-        .map((property) => property.getStructure());
 
 const findObjectLiteralExpressionWithProperty = (
     nodes: Node[] | undefined,
@@ -48,12 +38,32 @@ const sortAndReplaceProperties = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existing = getPropertyAssignments(literal);
-    const sorted = alphabetizeProperties(existing);
+    const sorted = sortPropertiesByName<
+        PropertyAssignment,
+        PropertyAssignmentStructure
+    >(existing);
     existing.forEach((property) => property.remove());
     literal.addProperties(sorted);
 
     return literal;
 };
+
+const sortPropertiesByName = <
+    TProperty extends PropertyAssignment | PropertySignature,
+    TPropertyStructure extends
+        | PropertyAssignmentStructure
+        | PropertySignatureStructure
+>(
+    properties: TProperty[]
+) =>
+    properties
+        .sort((a, b) =>
+            a
+                .getName()
+                .replace(/['"]/g, "")
+                .localeCompare(b.getName().replace(/['"]/g, ""))
+        )
+        .map((property) => property.getStructure() as TPropertyStructure);
 
 const shouldQuoteEscapeNewProperty = (
     name: string,
@@ -83,11 +93,11 @@ const shouldQuoteEscapeNewProperty = (
 // -----------------------------------------------------------------------------------------
 
 export const NodeUtils = {
-    alphabetizeProperties,
     findObjectLiteralExpressionWithProperty,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
     sortAndReplaceProperties,
+    sortPropertiesByName,
     shouldQuoteEscapeNewProperty,
 };
 

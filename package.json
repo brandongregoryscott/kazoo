@@ -25,13 +25,30 @@
                     "description": "Path/glob pattern to interface defining typed i18n keys"
                 },
                 "i18n-ext.cultureFilePaths": {
-                    "type": [
-                        "array"
-                    ],
+                    "type": "array",
                     "default": [
                         "**/cultures/*.ts"
                     ],
                     "description": "Array of paths/glob patterns to culture files"
+                },
+                "i18n-ext.insertionPosition": {
+                    "type": "string",
+                    "enum": [
+                        "End",
+                        "Loose Alphabetical",
+                        "Start",
+                        "Strict Alphabetical"
+                    ],
+                    "enumDescriptions": [
+                        "Inserts key at the end of the file/object",
+                        "Inserts key in best guess alphabetical order (Assumes file is already sorted - fastest)",
+                        "Inserts key at the start of the file/object",
+                        "Inserts key in alphabetical order (Performs a full sort on file - slower)"
+                    ],
+                    "default": [
+                        "Loose Alphabetical"
+                    ],
+                    "description": "Position to insert key/translation into file"
                 }
             }
         },

@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 const defaultConfig: ExtensionConfiguration = {
     cultureFilePaths: ["**/cultures/*.ts"],
     cultureInterfacePath: "**/interfaces/culture-resources.ts",
+    insertionPosition: InsertionPosition.LooseAlphabetical,
 };
 
 // #endregion Constants
