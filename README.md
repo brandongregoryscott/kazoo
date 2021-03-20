@@ -1,6 +1,9 @@
-# i18n-ext README
+# i18n-ext
 
-This is the README for your extension "i18n-ext". After writing up a brief description, we recommend including the following sections.
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
+
+VS Code extension to ease the burden of adding localized keys and strings to multiple typed culture files
 
 ## Features
 
@@ -14,57 +17,39 @@ For example if there is an image subfolder under your extension project workspac
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+-   Assumes the culture files are initialized using an object in the structure of the [`Culture`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core/blob/main/src/interfaces/culture.ts) interface from [`andculturecode-javascript-core`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core)
 
-## Extension Settings
+```ts
+import {
+    BaseEnglishUnitedStates,
+    Culture,
+    LocalizationUtils,
+} from "andculturecode-javascript-core";
+import CultureResources from "utilities/interfaces/culture-resources";
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+const EnglishUnitedStates: Culture<CultureResources> = LocalizationUtils.cultureFactory(
+    BaseEnglishUnitedStates,
+    {
+        resources: {
+            aboutApp: "About {{appName}}",
+            "acceptGroupInvitation-invitedByNameToJoin":
+                "{{byName}} invited you {{toJoin}}",
+            "acceptGroupInvitation-invitedToJoin":
+                "You've been invited {{toJoin}}",
+            "acceptGroupInvitation-join": "Join Team",
+            // ...
+        },
+    }
+);
+```
 
-For example:
+## Settings
 
-This extension contributes the following settings:
+This extension supports the following configuration settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+-   `i18n-ext.cultureFilePaths`: Array of paths/glob patterns to culture files
+    -   Default: `**/cultures/*.ts`
+-   `i18n-ext.cultureInterfacePath`: Path/glob pattern to interface defining typed i18n keys
+    -   Default: `**/interfaces/culture-resources.ts`
+-   `i18n-ext.insertionPosition`: Position to insert key/translation into file
+    -   Default: `Loose Alphabetical` (Inserts key in best guess alphabetical order, assuming file is already sorted)
