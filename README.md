@@ -7,13 +7,18 @@ VS Code extension to ease the burden of adding localized keys and strings to mul
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
 \!\[feature X\]\(images/feature-x.png\)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+-   Add key to interface
+
+    -   Prompts the user for a key to add to the interface specified in the extension settings.
+
+-   Add key to interface and translation to culture files
+
+    -   Prompts the user for a key and translation to add to the interface and culture files specified in the extension settings.
+
+-   Add translation to culture files
+    -   Prompts the user for a key and translation to add to each file specified in the extension settings.
 
 ## Requirements
 
