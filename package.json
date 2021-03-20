@@ -41,9 +41,9 @@
                     ],
                     "enumDescriptions": [
                         "Inserts key at the end of the file/object",
-                        "Inserts key in best guess alphabetical order (Assumes file is already sorted - fastest)",
+                        "Inserts key in best guess alphabetical order (Assumes file is already sorted)",
                         "Inserts key at the start of the file/object",
-                        "Inserts key in alphabetical order (Performs a full sort on file - slower)"
+                        "Inserts key in alphabetical order (Performs a full sort on file - slow)"
                     ],
                     "default": [
                         "Loose Alphabetical"

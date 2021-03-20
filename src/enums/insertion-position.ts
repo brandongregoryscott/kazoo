@@ -27,4 +27,6 @@ enum InsertionPosition {
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
+export { InsertionPosition };
+
 // #endregion Exports

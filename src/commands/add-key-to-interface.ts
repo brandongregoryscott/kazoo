@@ -1,7 +1,10 @@
 import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { PropertySignature } from "ts-morph";
+import { InterfaceDeclaration, PropertySignature } from "ts-morph";
+import { NodeUtils } from "../utilities/node-utils";
+import { ConfigUtils } from "../utilities/config-utils";
+import { StringUtils } from "../utilities/string-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,21 +26,32 @@ const addKeyToInterface = async () => {
     const existingProperty = _findExistingProperty(key, properties);
     if (existingProperty != null) {
         WindowUtils.error(
-            `Error - key '${key}' already exists in ${cultureInterface.getName()}:L${existingProperty.getStartLineNumber()}`
+            `Error - key '${key}' already exists in ${_fileAndLineNumber(
+                cultureInterface,
+                existingProperty
+            )}`
         );
         return;
     }
 
-    const index = _findAlphabeticalIndex(key, properties);
+    const index = NodeUtils.findIndex(
+        ConfigUtils.get().insertionPosition,
+        key,
+        properties
+    );
+
     const newProperty = cultureInterface.insertProperty(index, {
-        name: _quoteEscapeKey(key),
+        name: StringUtils.quoteEscapeIfNeeded(key, properties),
         type: "string",
     });
 
     await cultureInterfaceFile.save();
 
     WindowUtils.info(
-        `Key '${key}' successfully added to ${cultureInterface.getName()}:L${newProperty.getStartLineNumber()}`
+        `Key '${key}' successfully added to ${_fileAndLineNumber(
+            cultureInterface,
+            newProperty
+        )}`
     );
 
     return key;
@@ -48,6 +62,11 @@ const addKeyToInterface = async () => {
 // -----------------------------------------------------------------------------------------
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
+
+const _fileAndLineNumber = (
+    cultureInterface: InterfaceDeclaration,
+    property: PropertySignature
+): string => `${cultureInterface.getName()}:L${property.getStartLineNumber()}`;
 
 const _findAlphabeticalIndex = (
     key: string,

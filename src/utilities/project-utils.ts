@@ -7,11 +7,12 @@ import { FileUtils } from "./file-utils";
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
-const config = ConfigUtils.get();
 const ERROR_CULTURE_FILES_NOT_FOUND = `Error - no culture files could be found matching patterns ${JSON.stringify(
-    config.cultureFilePaths
+    ConfigUtils.get().cultureFilePaths
 )}. Please check the paths in your settings.`;
-const ERROR_CULTURE_INTERFACE_NOT_FOUND = `Error - culture interface could not be found matching path ${config.cultureInterfacePath}. Please check the path in your settings.`;
+const ERROR_CULTURE_INTERFACE_NOT_FOUND = `Error - culture interface could not be found matching path ${
+    ConfigUtils.get().cultureInterfacePath
+}. Please check the path in your settings.`;
 
 // #endregion Constants
 
@@ -75,7 +76,9 @@ const initializeFromConfig = async (): Promise<Project> => {
 // -----------------------------------------------------------------------------------------
 
 const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
-    const resolvedPaths = await FileUtils.findAll(config.cultureFilePaths);
+    const resolvedPaths = await FileUtils.findAll(
+        ConfigUtils.get().cultureFilePaths
+    );
 
     // BSCOTT - is this the right place to be handling errors?
     if (resolvedPaths.length <= 0) {
@@ -88,7 +91,9 @@ const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
 };
 
 const _getCultureInterfacePath = async (): Promise<string | undefined> => {
-    const path = await FileUtils.findFirst(config.cultureInterfacePath);
+    const path = await FileUtils.findFirst(
+        ConfigUtils.get().cultureInterfacePath
+    );
 
     // BSCOTT - is this the right place to be handling errors?
     if (path == null) {

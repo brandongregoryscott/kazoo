@@ -1,21 +1,25 @@
-import { InsertionPosition } from "../enums/insertion-position";
+import {
+    PropertyAssignment,
+    PropertyAssignmentStructure,
+    PropertySignature,
+    PropertySignatureStructure,
+} from "ts-morph";
 
 // -----------------------------------------------------------------------------------------
-// #region Interfaces
+// #region Types
 // -----------------------------------------------------------------------------------------
 
-interface ExtensionConfiguration {
-    cultureFilePaths: string[];
-    cultureInterfacePath: string;
-    insertionPosition: InsertionPosition;
-}
+type Property = PropertyAssignment | PropertySignature;
+type PropertyAndStructure =
+    | [PropertyAssignment, PropertyAssignmentStructure]
+    | [PropertySignature, PropertySignatureStructure];
 
-// #endregion Interfaces
+// #endregion Types
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { ExtensionConfiguration };
+export { Property, PropertyAndStructure };
 
 // #endregion Exports

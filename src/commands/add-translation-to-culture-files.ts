@@ -8,6 +8,17 @@ import {
 } from "ts-morph";
 import { NodeUtils } from "../utilities/node-utils";
 import { StringUtils } from "../utilities/string-utils";
+import { ConfigUtils } from "../utilities/config-utils";
+import { InsertionPosition } from "../enums/insertion-position";
+import { WindowUtils } from "../utilities/window-utils";
+
+// -----------------------------------------------------------------------------------------
+// #region Constants
+// -----------------------------------------------------------------------------------------
+
+const RESOURCES = "resources";
+
+// #endregion Constants
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -27,16 +38,16 @@ const addTranslationToCultureFiles = async (key?: string) => {
         return;
     }
 
-    const englishCopy = await vscode.window.showInputBox({
+    const translation = await vscode.window.showInputBox({
         prompt: `Enter the English copy for key '${key}'`,
     });
 
-    if (englishCopy == null) {
+    if (translation == null) {
         return;
     }
 
     const transformations = cultureFiles.map((file) =>
-        _addTranslationToFile(file, key!, englishCopy)
+        _addTranslationToFile(file, key!, translation)
     );
 
     await Promise.all(transformations);
@@ -75,34 +86,40 @@ const _addTranslationToFile = async (
     const args = initializer?.getArguments() ?? [];
     const resourceInitializer = NodeUtils.findObjectLiteralExpressionWithProperty(
         args,
-        "resources"
+        RESOURCES
     );
 
     if (resourceInitializer == null) {
+        WindowUtils.error(
+            `Expected to find object literal with key '${RESOURCES}' in ${file.getBaseName()}.`
+        );
         return;
     }
 
     const resourceObject = resourceInitializer
-        .getPropertyOrThrow("resources")
+        .getPropertyOrThrow(RESOURCES)
         .getLastChildIfKindOrThrow(SyntaxKind.ObjectLiteralExpression);
 
     const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
 
-    const propertyName = NodeUtils.shouldQuoteEscapeNewProperty(
-        key,
-        existingProperties
-    )
-        ? StringUtils.quoteEscape(key)
-        : StringUtils.stripQuotes(key);
-
     const newProperty: OptionalKind<PropertyAssignmentStructure> = {
-        name: propertyName,
+        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
         initializer: StringUtils.quoteEscape(value),
     };
 
-    resourceObject.addPropertyAssignment(newProperty);
+    const { insertionPosition } = ConfigUtils.get();
 
-    NodeUtils.sortAndReplaceProperties(resourceObject);
+    const index = NodeUtils.findIndex(
+        insertionPosition,
+        key,
+        existingProperties
+    );
+    resourceObject.insertPropertyAssignment(index, newProperty);
+
+    // Only do a full sort/replace if strictly alphabetizing
+    if (insertionPosition === InsertionPosition.StrictAlphabetical) {
+        NodeUtils.sortPropertyAssignments(resourceObject);
+    }
 
     return file.save();
 };

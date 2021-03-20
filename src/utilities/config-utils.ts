@@ -1,5 +1,6 @@
 import { ExtensionConfiguration } from "../interfaces/extension-configuration";
 import * as vscode from "vscode";
+import { InsertionPosition } from "../enums/insertion-position";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants

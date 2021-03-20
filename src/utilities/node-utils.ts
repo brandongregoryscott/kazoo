@@ -1,4 +1,5 @@
 import {
+    InterfaceDeclaration,
     Node,
     ObjectLiteralExpression,
     PropertyAssignment,
@@ -6,10 +7,35 @@ import {
     PropertySignature,
     PropertySignatureStructure,
 } from "ts-morph";
+import { InsertionPosition } from "../enums/insertion-position";
+import { Property } from "../types/property";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
+
+const findIndex = (
+    position: InsertionPosition,
+    name: string,
+    properties: Property[]
+): number => {
+    if (position === InsertionPosition.Start) {
+        return 0;
+    }
+
+    if (position === InsertionPosition.End) {
+        return properties.length;
+    }
+
+    // If position is alphabetical, we'll assume the consumer is handling 'strict' alphabetization
+    // due to reordering of entire property array
+    const names = [
+        ...properties.map((property) => _trimPropertyName(property)),
+        name,
+    ].sort();
+
+    return names.indexOf(name);
+};
 
 const findObjectLiteralExpressionWithProperty = (
     nodes: Node[] | undefined,
@@ -34,40 +60,44 @@ const isObjectLiteralExpressionWithProperty = (
 ): node is ObjectLiteralExpression =>
     Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
 
-const sortAndReplaceProperties = (
+const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existing = getPropertyAssignments(literal);
-    const sorted = sortPropertiesByName<
-        PropertyAssignment,
-        PropertyAssignmentStructure
-    >(existing);
+    const sorted = sortPropertiesByName<PropertyAssignmentStructure>(existing);
     existing.forEach((property) => property.remove());
     literal.addProperties(sorted);
 
     return literal;
 };
 
+const sortPropertySignatures = (
+    _interface: InterfaceDeclaration
+): InterfaceDeclaration => {
+    const existing = _interface.getProperties();
+    const sorted = sortPropertiesByName<PropertySignatureStructure>(existing);
+    existing.forEach((property) => property.remove());
+
+    _interface.addProperties(sorted);
+    return _interface;
+};
+
 const sortPropertiesByName = <
-    TProperty extends PropertyAssignment | PropertySignature,
     TPropertyStructure extends
         | PropertyAssignmentStructure
         | PropertySignatureStructure
 >(
-    properties: TProperty[]
+    properties: Property[]
 ) =>
     properties
         .sort((a, b) =>
-            a
-                .getName()
-                .replace(/['"]/g, "")
-                .localeCompare(b.getName().replace(/['"]/g, ""))
+            _trimPropertyName(a).localeCompare(_trimPropertyName(b))
         )
         .map((property) => property.getStructure() as TPropertyStructure);
 
 const shouldQuoteEscapeNewProperty = (
     name: string,
-    existing: PropertyAssignment[]
+    existing: Property[]
 ): boolean => {
     // If the property name has spaces or dashes, it will need to be quote escaped to be valid TS.
     if (name.includes(" ") || name.includes("-")) {
@@ -89,16 +119,27 @@ const shouldQuoteEscapeNewProperty = (
 // #endregion Public Functions
 
 // -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const _trimPropertyName = (property: Property) =>
+    property.getName().replace(/['"]/g, "");
+
+// #endregion Private Functions
+
+// -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
 export const NodeUtils = {
+    findIndex,
     findObjectLiteralExpressionWithProperty,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
-    sortAndReplaceProperties,
-    sortPropertiesByName,
     shouldQuoteEscapeNewProperty,
+    sortPropertiesByName,
+    sortPropertyAssignments,
+    sortPropertySignatures,
 };
 
 // #endregion Exports
