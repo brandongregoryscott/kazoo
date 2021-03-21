@@ -109,6 +109,7 @@ const shouldQuoteEscapeNewProperty = (
 
     if (
         // If every property starts & ends with quotes, it must be an enforced style. Keep it consistent.
+        existing.length > 0 &&
         existing.every((property) =>
             property.getName().match(/["']{1}[a-zA-Z0-9 _\-]+["']{1}/)
         )

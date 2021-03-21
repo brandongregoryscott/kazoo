@@ -12,11 +12,14 @@ const matchLanguageCode = (variableName?: string): string | undefined => {
     }
 
     const patterns = Object.keys(LanguageCodeMap);
+
     let languageCode: string | undefined = undefined;
     patterns.forEach((pattern) => {
-        if (new RegExp(pattern).test(variableName) && languageCode == null) {
-            languageCode = LanguageCodeMap[pattern];
+        if (languageCode != null || !new RegExp(pattern).test(variableName)) {
+            return;
         }
+
+        languageCode = LanguageCodeMap[pattern];
     });
 
     return languageCode;
