@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "esModuleInterop": true,
+        "esModuleInterop": false,
         "lib": ["es6"],
         "module": "commonjs",
         "outDir": "dist",

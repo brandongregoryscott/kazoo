@@ -13,7 +13,7 @@ import { StringUtils } from "../utilities/string-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
-import translate from "@vitalets/google-translate-api";
+import * as translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
 
