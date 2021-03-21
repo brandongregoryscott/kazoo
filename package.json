@@ -4,6 +4,10 @@
         "onCommand:i18n-ext.addKeyToInterface",
         "onCommand:i18n-ext.addTranslationToCultureFiles"
     ],
+    "author": {
+        "name": "Brandon Scott",
+        "url": "https://github.com/brandongregoryscott"
+    },
     "categories": [
         "Other"
     ],
@@ -60,6 +64,7 @@
         }
     },
     "dependencies": {
+        "google-translate-api": "^2.3.0",
         "ts-morph": "10.0.1"
     },
     "description": "Ease the burden of adding localized keys and strings to multiple typed culture files",
@@ -88,8 +93,13 @@
         "translations",
         "typescript"
     ],
+    "license": "Apache-2.0",
     "main": "./dist/extension.js",
     "name": "i18n-ext",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:brandongregoryscott/i18n-ext.git"
+    },
     "scripts": {
         "build": "tsc --pretty --project tsconfig.json",
         "clean": "rimraff dist",

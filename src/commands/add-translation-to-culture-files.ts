@@ -84,6 +84,9 @@ const _addTranslationToFile = async (
     );
 
     const args = initializer?.getArguments() ?? [];
+    const baseLanguage = initializer?.getChildrenOfKind(
+        SyntaxKind.Identifier
+    )[0];
     const resourceInitializer = NodeUtils.findObjectLiteralExpressionWithProperty(
         args,
         RESOURCES
