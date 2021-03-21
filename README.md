@@ -7,11 +7,11 @@ VS Code extension to ease the burden of adding localized keys and strings to mul
 
 ## Features
 
-\!\[feature X\]\(images/feature-x.png\)
-
 -   Add key to interface
 
     -   Prompts the user for a key to add to the interface specified in the extension settings.
+
+![Add key to interface and translation to culture files](examples/add-key-to-interface-and-translation-to-culture-files.gif)
 
 -   Add key to interface and translation to culture files
 
