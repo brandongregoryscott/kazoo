@@ -40,17 +40,19 @@ const EnglishUnitedStates: Culture<CultureResources> = LocalizationUtils.culture
     BaseEnglishUnitedStates,
     {
         resources: {
-            aboutApp: "About {{appName}}",
-            "acceptGroupInvitation-invitedByNameToJoin":
-                "{{byName}} invited you {{toJoin}}",
-            "acceptGroupInvitation-invitedToJoin":
-                "You've been invited {{toJoin}}",
-            "acceptGroupInvitation-join": "Join Team",
-            // ...
+            accountInformation: "Account Information",
+            cancelMySubscription: "Cancel My Subscription",
+            checkOutFaq: "Check out our FAQs",
+            subscriptionDetails: "Subscription Details",
+            teamManagement: "Team Management",
         },
     }
 );
 ```
+
+## How it works
+
+This extension leverages [`ts-morph`](https://github.com/dsherret/ts-morph) under the hood to read & manipulate the TypeScript AST. This means that you don't need the interface or culture files open in your VS Code window for it to perform the manipulations. It also means that it manipulates the files from their saved versions on disk - if you have open but unsaved changes in your editor, it's going to yell at you when you try to save because the file on disk will be newer than the version in your editor.
 
 ## Settings
 
