@@ -1,0 +1,29 @@
+name: i18n-ext
+
+on:
+    push:
+        branches: ["*"]
+    pull_request_target:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        if: always()
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Setup node 14.15.5
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 14.15.5
+
+            - name: npm install
+              run: |
+                  npm install
+
+            - name: npm run build
+              run: |
+                  npm run build
