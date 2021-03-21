@@ -150,7 +150,7 @@ const _buildNewProperty = async (
 
         return {
             name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
-            initializer: translationResult.text,
+            initializer: StringUtils.quoteEscape(translationResult.text),
         };
     } catch (error) {
         WindowUtils.error(
