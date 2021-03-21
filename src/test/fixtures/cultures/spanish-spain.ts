@@ -2,6 +2,7 @@ import {
     BaseSpanishSpain,
     Culture,
     LocalizationUtils,
+    // @ts-ignore
 } from "andculturecode-javascript-core";
 import { CultureResources } from "../interfaces/culture-resources";
 
