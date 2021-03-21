@@ -11,14 +11,18 @@ VS Code extension to ease the burden of adding localized keys and strings to mul
 
     -   Prompts the user for a key to add to the interface specified in the extension settings.
 
-![Add key to interface and translation to culture files](examples/add-key-to-interface-and-translation-to-culture-files.gif)
+![Add key to interface](examples/add-key-to-interface.gif)
 
 -   Add key to interface and translation to culture files
 
     -   Prompts the user for a key and translation to add to the interface and culture files specified in the extension settings.
 
+![Add key to interface and translation to culture files](examples/add-key-to-interface-and-translation-to-culture-files.gif)
+
 -   Add translation to culture files
     -   Prompts the user for a key and translation to add to each file specified in the extension settings.
+
+![Add translation to culture files](examples/add-translation-to-culture-files.gif)
 
 ## Requirements
 
