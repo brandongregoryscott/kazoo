@@ -1,10 +1,10 @@
 import {
+    Identifier,
     InterfaceDeclaration,
     Node,
     ObjectLiteralExpression,
     PropertyAssignment,
     PropertyAssignmentStructure,
-    PropertySignature,
     PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
@@ -36,6 +36,9 @@ const findIndex = (
 
     return names.indexOf(name);
 };
+
+const findInitializer = (nodes?: Node[]): Identifier | undefined =>
+    nodes?.find((node) => Node.isIdentifier(node)) as Identifier | undefined;
 
 const findObjectLiteralExpressionWithProperty = (
     nodes: Node[] | undefined,
@@ -133,6 +136,7 @@ const _trimPropertyName = (property: Property) =>
 
 export const NodeUtils = {
     findIndex,
+    findInitializer,
     findObjectLiteralExpressionWithProperty,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,

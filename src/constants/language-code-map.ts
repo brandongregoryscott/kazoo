@@ -2,6 +2,8 @@
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
+const DEFAULT_LANGUAGE_CODE = "en";
+
 /**
  * Mapping variable name patterns to Google Translate API supported language codes
  *
@@ -9,8 +11,8 @@
  * support specific locale variants of languages
  */
 const LanguageCodeMap: Record<string, string> = {
-    "*English*": "en",
-    "*Spanish*": "es",
+    English: "en",
+    Spanish: "es",
 };
 
 // #endregion Constants
@@ -19,6 +21,6 @@ const LanguageCodeMap: Record<string, string> = {
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { LanguageCodeMap };
+export { DEFAULT_LANGUAGE_CODE, LanguageCodeMap };
 
 // #endregion Exports

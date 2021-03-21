@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
 import { SyntaxKind } from "@ts-morph/common";
 import {
+    Identifier,
+    Node,
     OptionalKind,
     PropertyAssignmentStructure,
     SourceFile,
@@ -11,6 +13,9 @@ import { StringUtils } from "../utilities/string-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
+import translate from "@vitalets/google-translate-api";
+import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
+import { Property } from "../types/property";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -68,47 +73,38 @@ const _addTranslationToFile = async (
     const cultureResource = file.getVariableDeclaration((variable) =>
         variable.isExported()
     );
-
-    // If further comparison is needed, underlying type name can be compared like so:
-    // variable.getType().getSymbol().getEscapedName() === "Culture"
-
-    // The current way we're structuring the exported variable is with an initialization like...
-    // const EnglishUnitedStates = LocalizationUtils.cultureFactory(BaseEnglishUnitedStates, {
-    //     resources: {
-    //         "example": "This is an example",
-    //         ...
-    //     }
-    // })
-    const initializer = cultureResource?.getInitializerIfKind(
-        SyntaxKind.CallExpression
-    );
-
-    const args = initializer?.getArguments() ?? [];
-    const baseLanguage = initializer?.getChildrenOfKind(
-        SyntaxKind.Identifier
-    )[0];
+    const initializerArgs =
+        cultureResource
+            ?.getInitializerIfKind(SyntaxKind.CallExpression)
+            ?.getArguments() ?? [];
+    const baseLanguage = NodeUtils.findInitializer(initializerArgs);
     const resourceInitializer = NodeUtils.findObjectLiteralExpressionWithProperty(
-        args,
+        initializerArgs,
         RESOURCES
     );
 
     if (resourceInitializer == null) {
-        WindowUtils.error(
-            `Expected to find object literal with key '${RESOURCES}' in ${file.getBaseName()}.`
-        );
+        _errorResourcesNotFound(file);
         return;
     }
 
     const resourceObject = resourceInitializer
-        .getPropertyOrThrow(RESOURCES)
-        .getLastChildIfKindOrThrow(SyntaxKind.ObjectLiteralExpression);
+        .getProperty(RESOURCES)
+        ?.getLastChildByKind(SyntaxKind.ObjectLiteralExpression);
+
+    if (resourceObject == null) {
+        _errorResourcesNotFound(file);
+        return;
+    }
 
     const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
 
-    const newProperty: OptionalKind<PropertyAssignmentStructure> = {
-        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
-        initializer: StringUtils.quoteEscape(value),
-    };
+    const newProperty = await _buildNewProperty(
+        key,
+        value,
+        existingProperties,
+        baseLanguage
+    );
 
     const { insertionPosition } = ConfigUtils.get();
 
@@ -126,6 +122,49 @@ const _addTranslationToFile = async (
 
     return file.save();
 };
+
+const _buildNewProperty = async (
+    key: string,
+    value: string,
+    existingProperties: Property[],
+    baseLanguage?: Identifier
+): Promise<OptionalKind<PropertyAssignmentStructure>> => {
+    const matchedLanguage = StringUtils.matchLanguageCode(
+        baseLanguage?.getText()
+    );
+
+    let property: OptionalKind<PropertyAssignmentStructure> = {
+        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+        initializer: StringUtils.quoteEscape(value),
+    };
+
+    if (matchedLanguage == null || matchedLanguage === DEFAULT_LANGUAGE_CODE) {
+        return property;
+    }
+
+    try {
+        const translationResult = await translate(value, {
+            from: DEFAULT_LANGUAGE_CODE,
+            to: matchedLanguage,
+        });
+
+        return {
+            name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+            initializer: translationResult.text,
+        };
+    } catch (error) {
+        WindowUtils.error(
+            `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`
+        );
+    }
+
+    return property;
+};
+
+const _errorResourcesNotFound = (file: SourceFile) =>
+    WindowUtils.error(
+        `Expected to find object literal with key '${RESOURCES}' in ${file.getBaseName()}.`
+    );
 
 // #endregion Private Functions
 

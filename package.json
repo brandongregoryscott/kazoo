@@ -64,7 +64,7 @@
         }
     },
     "dependencies": {
-        "google-translate-api": "^2.3.0",
+        "@vitalets/google-translate-api": "5.1.0",
         "ts-morph": "10.0.1"
     },
     "description": "Ease the burden of adding localized keys and strings to multiple typed culture files",

@@ -1,9 +1,26 @@
+import { LanguageCodeMap } from "../constants/language-code-map";
 import { Property } from "../types/property";
 import { NodeUtils } from "./node-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
+
+const matchLanguageCode = (variableName?: string): string | undefined => {
+    if (variableName == null) {
+        return undefined;
+    }
+
+    const patterns = Object.keys(LanguageCodeMap);
+    let languageCode: string | undefined = undefined;
+    patterns.forEach((pattern) => {
+        if (new RegExp(pattern).test(variableName) && languageCode == null) {
+            languageCode = LanguageCodeMap[pattern];
+        }
+    });
+
+    return languageCode;
+};
 
 const quoteEscape = (value: string): string => {
     const quote = `"`;
@@ -33,6 +50,7 @@ const stripQuotes = (value: string) => value.replace(/["']/g, "");
 // -----------------------------------------------------------------------------------------
 
 export const StringUtils = {
+    matchLanguageCode,
     quoteEscape,
     quoteEscapeIfNeeded,
     stripQuotes,
