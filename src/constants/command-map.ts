@@ -7,9 +7,9 @@ import { addTranslationToCultureFiles } from "../commands/add-translation-to-cul
 // -----------------------------------------------------------------------------------------
 
 const CommandMap: Record<string, (...args: any[]) => any> = {
-    "i18n-ext.addKeyAndTranslation": addKeyAndTranslation,
-    "i18n-ext.addKeyToInterface": addKeyToInterface,
-    "i18n-ext.addTranslationToCultureFiles": addTranslationToCultureFiles,
+    "kazoo.addKeyAndTranslation": addKeyAndTranslation,
+    "kazoo.addKeyToInterface": addKeyToInterface,
+    "kazoo.addTranslationToCultureFiles": addTranslationToCultureFiles,
 };
 
 // #endregion Constants

@@ -1,4 +1,4 @@
-# i18n-ext
+# kazoo
 
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
@@ -62,9 +62,9 @@ For translating non-English copy, the extension leverages [`@vitalets/google-tra
 
 This extension supports the following configuration settings:
 
--   `i18n-ext.cultureFilePaths`: Array of paths/glob patterns to culture files
+-   `kazoo.cultureFilePaths`: Array of paths/glob patterns to culture files
     -   Default: `**/cultures/*.ts`
--   `i18n-ext.cultureInterfacePath`: Path/glob pattern to interface defining typed i18n keys
+-   `kazoo.cultureInterfacePath`: Path/glob pattern to interface defining typed i18n keys
     -   Default: `**/interfaces/culture-resources.ts`
--   `i18n-ext.insertionPosition`: Position to insert key/translation into file
+-   `kazoo.insertionPosition`: Position to insert key/translation into file
     -   Default: `Loose Alphabetical` (Inserts key in best guess alphabetical order, assuming file is already sorted)

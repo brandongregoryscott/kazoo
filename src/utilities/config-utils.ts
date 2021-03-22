@@ -19,9 +19,8 @@ const defaultConfig: ExtensionConfiguration = {
 // -----------------------------------------------------------------------------------------
 
 const get = (): ExtensionConfiguration =>
-    vscode.workspace
-        .getConfiguration()
-        .get<ExtensionConfiguration>("i18n-ext") ?? defaultConfig;
+    vscode.workspace.getConfiguration().get<ExtensionConfiguration>("kazoo") ??
+    defaultConfig;
 
 // #endregion Public Functions
 
