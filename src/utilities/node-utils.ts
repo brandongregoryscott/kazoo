@@ -14,6 +14,15 @@ import { Property } from "../types/property";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
+const findPropertyByName = (
+    name: string,
+    properties: Property[]
+): Property | undefined => {
+    const names = properties.map((property) => _trimPropertyName(property));
+    const index = names.indexOf(name);
+    return properties[index];
+};
+
 const findIndex = (
     position: InsertionPosition,
     name: string,
@@ -139,6 +148,7 @@ export const NodeUtils = {
     findIndex,
     findInitializer,
     findObjectLiteralExpressionWithProperty,
+    findPropertyByName,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
     shouldQuoteEscapeNewProperty,

@@ -5,6 +5,7 @@ import { InterfaceDeclaration, PropertySignature } from "ts-morph";
 import { NodeUtils } from "../utilities/node-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { StringUtils } from "../utilities/string-utils";
+import { Property } from "../types/property";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,7 +24,7 @@ const addKeyToInterface = async () => {
     }
 
     const properties = cultureInterface.getProperties();
-    const existingProperty = _findExistingProperty(key, properties);
+    const existingProperty = NodeUtils.findPropertyByName(key, properties);
     if (existingProperty != null) {
         WindowUtils.error(
             `Error - key '${key}' already exists in ${_fileAndLineNumber(
@@ -65,53 +66,8 @@ const addKeyToInterface = async () => {
 
 const _fileAndLineNumber = (
     cultureInterface: InterfaceDeclaration,
-    property: PropertySignature
+    property: Property
 ): string => `${cultureInterface.getName()}:L${property.getStartLineNumber()}`;
-
-const _findAlphabeticalIndex = (
-    key: string,
-    properties: PropertySignature[]
-): number => {
-    const propertyNames = _stripPropertyNamesOfQuotes(properties);
-
-    propertyNames.push(key);
-
-    return propertyNames
-        .sort()
-        .findIndex((propertyName) => propertyName === key);
-};
-
-const _findExistingProperty = (
-    key: string,
-    properties: PropertySignature[]
-): PropertySignature | undefined => {
-    const index = _stripPropertyNamesOfQuotes(properties).findIndex(
-        (propertyName) => propertyName === key
-    );
-
-    return properties[index];
-};
-
-const _stripPropertyNamesOfQuotes = (
-    properties: PropertySignature[]
-): string[] =>
-    properties.map((property) =>
-        // Strip out any quotes that may be surrounding the actual property name
-        property.getName().replace(/['"]/g, "")
-    );
-
-// BSCOTT - This might need to be a configuration setting
-const _quoteEscapeKey = (key: string) => {
-    if (!key.startsWith(`"`)) {
-        key = `"${key}`;
-    }
-
-    if (!key.endsWith(`"`)) {
-        key = `${key}"`;
-    }
-
-    return key;
-};
 
 // #endregion Private Functions
 
