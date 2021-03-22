@@ -52,7 +52,11 @@ const EnglishUnitedStates: Culture<CultureResources> = LocalizationUtils.culture
 
 ## How it works
 
-This extension leverages [`ts-morph`](https://github.com/dsherret/ts-morph) under the hood to read & manipulate the TypeScript AST. This means that you don't need the interface or culture files open in your VS Code window for it to perform the manipulations. It also means that it manipulates the files from their saved versions on disk - if you have open but unsaved changes in your editor, it's going to yell at you when you try to save because the file on disk will be newer than the version in your editor.
+This extension leverages [`ts-morph`](https://github.com/dsherret/ts-morph) under the hood to read & manipulate the TypeScript AST. This means that you don't need the interface or culture files open in your VS Code window for it to perform the manipulations.
+
+> It also means that it manipulates the files from their saved versions on disk - if you have open but unsaved changes in your editor, it's going to yell at you when you try to save because the file on disk will be newer than the version in your editor.
+
+For translating non-English copy, the extension leverages [`@vitalets/google-translate-api`](https://github.com/vitalets/google-translate-api), determining which language to translate to based on the base culture being extended from [`andculturecode-javascript-core`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core) (currently supporting Spanish, but can be easily updated).
 
 ## Settings
 
