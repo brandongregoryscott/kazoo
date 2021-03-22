@@ -6,6 +6,7 @@ import { NodeUtils } from "../utilities/node-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { StringUtils } from "../utilities/string-utils";
 import { Property } from "../types/property";
+import { InsertionPosition } from "../enums/insertion-position";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -35,18 +36,26 @@ const addKeyToInterface = async () => {
         return;
     }
 
-    const index = NodeUtils.findIndex(
-        ConfigUtils.get().insertionPosition,
-        key,
-        properties
-    );
+    const { insertionPosition } = ConfigUtils.get();
+    const index = NodeUtils.findIndex(insertionPosition, key, properties);
 
-    const newProperty = cultureInterface.insertProperty(index, {
+    let newProperty: Property = cultureInterface.insertProperty(index, {
         name: StringUtils.quoteEscapeIfNeeded(key, properties),
         type: "string",
     });
 
+    // Only do a full sort/replace if strictly alphabetizing
+    if (insertionPosition === InsertionPosition.StrictAlphabetical) {
+        NodeUtils.sortPropertySignatures(cultureInterface);
+    }
+
     await cultureInterfaceFile.save();
+
+    // Refresh property as original might have been removed if strictly alphabetizing
+    newProperty = NodeUtils.findPropertyByName(
+        key,
+        cultureInterface.getProperties()
+    )!;
 
     WindowUtils.info(
         `Key '${key}' successfully added to ${_fileAndLineNumber(
