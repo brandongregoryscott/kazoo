@@ -29,6 +29,7 @@ const get = (): ExtensionConfiguration =>
 // -----------------------------------------------------------------------------------------
 
 export const ConfigUtils = {
+    defaultConfig,
     get,
 };
 
