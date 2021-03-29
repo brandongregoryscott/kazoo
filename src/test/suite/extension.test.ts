@@ -1,15 +1,25 @@
-import * as assert from 'assert';
+import * as assert from "assert";
+import * as vscode from "vscode";
+import { describe } from "mocha";
+import * as kazoo from "../../extension";
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+suite("kazoo", () => {
+    // -----------------------------------------------------------------------------------------
+    // #region addKeyToInterface
+    // -----------------------------------------------------------------------------------------
 
-suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+    describe("addKeyToInterface", () => {
+        test("inserts key into interface", async () => {
+            // Arrange
+            const key = "testKey";
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
-	});
+            // Act
+            const result = await kazoo.addKeyToInterface(key);
+
+            // Assert
+            assert.equal(result, key);
+        });
+    });
+
+    // #endregion addKeyToInterface
 });

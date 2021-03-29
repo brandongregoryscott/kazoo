@@ -115,7 +115,7 @@
         "pretest": "npm run build && npm run lint",
         "test": "node ./dist/test/runTest.js",
         "vscode:prepublish": "npm run build",
-        "watch": "tsc --pretty --watch"
+        "watch": "tsc --pretty --watch --project tsconfig.json"
     },
     "version": "0.0.1"
 }

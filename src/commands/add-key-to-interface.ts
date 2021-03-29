@@ -1,7 +1,7 @@
 import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { InterfaceDeclaration, PropertySignature } from "ts-morph";
+import { InterfaceDeclaration } from "ts-morph";
 import { NodeUtils } from "../utilities/node-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { StringUtils } from "../utilities/string-utils";
@@ -12,13 +12,15 @@ import { InsertionPosition } from "../enums/insertion-position";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const addKeyToInterface = async () => {
+const addKeyToInterface = async (key?: string) => {
     const cultureInterfaceFile = await ProjectUtils.getCultureInterfaceFile();
     const cultureInterface = await ProjectUtils.getCultureInterface();
 
-    const key = await vscode.window.showInputBox({
-        prompt: `Enter a key to insert into ${cultureInterface.getName()}`,
-    });
+    if (key == null) {
+        key = await vscode.window.showInputBox({
+            prompt: `Enter a key to insert into ${cultureInterface.getName()}`,
+        });
+    }
 
     if (key == null) {
         return;

@@ -5,13 +5,13 @@ import { addTranslationToCultureFiles } from "./add-translation-to-culture-files
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const addKeyAndTranslation = async () => {
-    const key = await addKeyToInterface();
+const addKeyAndTranslation = async (key?: string, translation?: string) => {
+    key = await addKeyToInterface(key);
     if (key == null) {
         return;
     }
 
-    await addTranslationToCultureFiles(key);
+    await addTranslationToCultureFiles(key, translation);
 };
 
 // #endregion Public Functions
