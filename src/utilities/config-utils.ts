@@ -12,6 +12,8 @@ const defaultConfig: ExtensionConfiguration = {
     insertionPosition: InsertionPosition.LooseAlphabetical,
 };
 
+const key = "kazoo";
+
 // #endregion Constants
 
 // -----------------------------------------------------------------------------------------
@@ -19,7 +21,7 @@ const defaultConfig: ExtensionConfiguration = {
 // -----------------------------------------------------------------------------------------
 
 const get = (): ExtensionConfiguration =>
-    vscode.workspace.getConfiguration().get<ExtensionConfiguration>("kazoo") ??
+    vscode.workspace.getConfiguration().get<ExtensionConfiguration>(key) ??
     defaultConfig;
 
 // #endregion Public Functions
@@ -30,6 +32,7 @@ const get = (): ExtensionConfiguration =>
 
 export const ConfigUtils = {
     defaultConfig,
+    key,
     get,
 };
 
