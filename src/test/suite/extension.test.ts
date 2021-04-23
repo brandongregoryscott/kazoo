@@ -2,8 +2,22 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { describe } from "mocha";
 import * as kazoo from "../../extension";
+import { TestUtils } from "../test-utils";
 
 suite("kazoo", () => {
+    const shouldActivate = async () => {
+        // Arrange
+        const extension = vscode.extensions.getExtension(
+            "brandongregoryscott.kazoo"
+        );
+
+        // Act & Assert
+        await extension?.activate();
+        assert.equal(extension?.isActive, true);
+    };
+
+    test("should activate extension", shouldActivate);
+
     // -----------------------------------------------------------------------------------------
     // #region addKeyToInterface
     // -----------------------------------------------------------------------------------------
@@ -12,6 +26,10 @@ suite("kazoo", () => {
         test("inserts key into interface", async () => {
             // Arrange
             const key = "testKey";
+            await TestUtils.mergeConfig({
+                cultureInterfacePath:
+                    "fixtures/empty/interfaces/culture-resources.ts",
+            });
 
             // Act
             const result = await kazoo.addKeyToInterface(key);
