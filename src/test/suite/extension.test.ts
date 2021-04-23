@@ -4,6 +4,8 @@ import { describe } from "mocha";
 import * as kazoo from "../../extension";
 import { TestUtils } from "../test-utils";
 
+const workspaceFolder = `${__dirname}/../../../src/test/`;
+
 suite("kazoo", () => {
     const shouldActivate = async () => {
         // Arrange
@@ -26,10 +28,6 @@ suite("kazoo", () => {
         test("inserts key into interface", async () => {
             // Arrange
             const key = "testKey";
-            await TestUtils.mergeConfig({
-                cultureInterfacePath:
-                    "fixtures/empty/interfaces/culture-resources.ts",
-            });
 
             // Act
             const result = await kazoo.addKeyToInterface(key);

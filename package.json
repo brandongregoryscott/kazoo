@@ -44,9 +44,7 @@
                     "type": "string"
                 },
                 "kazoo.insertionPosition": {
-                    "default": [
-                        "Loose Alphabetical"
-                    ],
+                    "default": "Loose Alphabetical",
                     "description": "Position to insert key/translation into file",
                     "enum": [
                         "End",

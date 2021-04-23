@@ -2,7 +2,9 @@
 // #region Interfaces
 // -----------------------------------------------------------------------------------------
 
-interface CultureResources {}
+interface CultureResources {
+    testKey: string;
+}
 
 // #endregion Interfaces
 
