@@ -15,6 +15,7 @@ suite("kazoo", () => {
             vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         const fixturesDirectory = upath.join(workspaceDirectory, "fixtures");
 
+        // Manually set node execPath (see https://github.com/shelljs/shelljs/wiki/Electron-compatibility)
         shell.config.execPath = shell.which("node").toString();
         shell.cd(fixturesDirectory);
         shell.exec("git checkout .");
