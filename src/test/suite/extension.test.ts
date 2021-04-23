@@ -1,12 +1,25 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { describe } from "mocha";
+import { describe, afterEach, beforeEach } from "mocha";
 import * as kazoo from "../../extension";
-import { TestUtils } from "../test-utils";
-
-const workspaceFolder = `${__dirname}/../../../src/test/`;
+import * as shell from "shelljs";
+import * as upath from "upath";
 
 suite("kazoo", () => {
+    // -----------------------------------------------------------------------------------------
+    // #region Setup
+    // -----------------------------------------------------------------------------------------
+
+    const cleanupFixtures = () => {
+        const workspaceDirectory =
+            vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const fixturesDirectory = upath.join(workspaceDirectory, "fixtures");
+
+        shell.config.execPath = shell.which("node").toString();
+        shell.cd(fixturesDirectory);
+        shell.exec("git checkout .");
+    };
+
     const shouldActivate = async () => {
         // Arrange
         const extension = vscode.extensions.getExtension(
@@ -18,6 +31,8 @@ suite("kazoo", () => {
         assert.equal(extension?.isActive, true);
     };
 
+    // #endregion Setup
+
     test("should activate extension", shouldActivate);
 
     // -----------------------------------------------------------------------------------------
@@ -25,7 +40,15 @@ suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
 
     describe("addKeyToInterface", () => {
-        test("inserts key into interface", async () => {
+        beforeEach(() => {
+            cleanupFixtures();
+        });
+
+        afterEach(() => {
+            cleanupFixtures();
+        });
+
+        test("inserts key into interface, returns created key", async () => {
             // Arrange
             const key = "testKey";
 
