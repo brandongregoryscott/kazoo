@@ -6,7 +6,7 @@ import { ConfigUtils } from "../utilities/config-utils";
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
-const { key, defaultConfig } = ConfigUtils;
+const { defaultConfig } = ConfigUtils;
 
 // #endregion Constants
 
@@ -19,16 +19,29 @@ const TestUtils = {
         const existing = await ConfigUtils.get();
         return this.setConfig({ ...existing, ...updated });
     },
-    async setConfig(config: ExtensionConfiguration) {
-        return vscode.workspace
-            .getConfiguration()
-            .update(key, config, vscode.ConfigurationTarget.Global);
+    async setConfig(updated: ExtensionConfiguration) {
+        const config = vscode.workspace.getConfiguration(ConfigUtils.key);
+        const keys = Object.keys(updated) as Array<
+            keyof ExtensionConfiguration
+        >;
+        const configUpdates = keys.map((key: keyof ExtensionConfiguration) =>
+            config.update(getSettingKey(key), updated[key])
+        );
+        return await Promise.all(configUpdates);
     },
     async resetConfig() {
         return this.setConfig(defaultConfig);
     },
 };
 // #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const getSettingKey = (setting: string) => `${ConfigUtils.key}.${setting}`;
+
+// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
