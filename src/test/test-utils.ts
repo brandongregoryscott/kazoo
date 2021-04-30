@@ -1,6 +1,8 @@
 import { ExtensionConfiguration } from "../interfaces/extension-configuration";
 import * as vscode from "vscode";
 import { ConfigUtils } from "../utilities/config-utils";
+import * as shell from "shelljs";
+import * as upath from "upath";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -15,6 +17,18 @@ const { defaultConfig } = ConfigUtils;
 // -----------------------------------------------------------------------------------------
 
 const TestUtils = {
+    copyFixturesToTmpDirectory(fixture: string): string {
+        shell.config.fatal = true;
+        const tmpDirectory = upath.toUnix(shell.tempdir());
+
+        shell.cp(
+            "-R",
+            upath.join(getWorkspaceFolder(), "fixtures", fixture, "*"),
+            tmpDirectory
+        );
+
+        return tmpDirectory;
+    },
     async mergeConfig(updated: Partial<ExtensionConfiguration>) {
         const existing = await ConfigUtils.get();
         return this.setConfig({ ...existing, ...updated });
@@ -25,7 +39,7 @@ const TestUtils = {
             keyof ExtensionConfiguration
         >;
         const configUpdates = keys.map((key: keyof ExtensionConfiguration) =>
-            config.update(getSettingKey(key), updated[key])
+            config.update(key, updated[key])
         );
         return await Promise.all(configUpdates);
     },
@@ -39,7 +53,8 @@ const TestUtils = {
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const getSettingKey = (setting: string) => `${ConfigUtils.key}.${setting}`;
+const getWorkspaceFolder = () =>
+    upath.toUnix(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? "");
 
 // #endregion Private Functions
 

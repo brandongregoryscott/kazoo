@@ -4,22 +4,23 @@ import { describe, afterEach, beforeEach } from "mocha";
 import * as kazoo from "../../extension";
 import * as shell from "shelljs";
 import * as upath from "upath";
+import { TestUtils } from "../test-utils";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
     // #region Setup
     // -----------------------------------------------------------------------------------------
 
-    const cleanupFixtures = () => {
-        const workspaceDirectory =
-            vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-        const fixturesDirectory = upath.join(workspaceDirectory, "fixtures");
+    // const cleanupFixtures = () => {
+    //     const workspaceDirectory =
+    //         vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    //     const fixturesDirectory = upath.join(workspaceDirectory, "fixtures");
 
-        // Manually set node execPath (see https://github.com/shelljs/shelljs/wiki/Electron-compatibility)
-        shell.config.execPath = shell.which("node").toString();
-        shell.cd(fixturesDirectory);
-        shell.exec("git checkout .");
-    };
+    //     // Manually set node execPath (see https://github.com/shelljs/shelljs/wiki/Electron-compatibility)
+    //     shell.config.execPath = shell.which("node").toString();
+    //     shell.cd(fixturesDirectory);
+    //     shell.exec("git checkout .");
+    // };
 
     const shouldActivate = async () => {
         // Arrange
@@ -27,8 +28,10 @@ suite("kazoo", () => {
             "brandongregoryscott.kazoo"
         );
 
-        // Act & Assert
+        // Act
         await extension?.activate();
+
+        // Assert
         assert.equal(extension?.isActive, true);
     };
 
@@ -41,23 +44,35 @@ suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
 
     describe("addKeyToInterface", () => {
-        beforeEach(() => {
-            cleanupFixtures();
-        });
+        // beforeEach(() => {
+        //     cleanupFixtures();
+        // });
 
-        afterEach(() => {
-            cleanupFixtures();
-        });
+        // afterEach(() => {
+        //     cleanupFixtures();
+        // });
 
-        test("inserts key into interface, returns created key", async () => {
-            // Arrange
-            const key = "testKey";
+        describe("given interface is empty", () => {
+            let tmpDirectory: string;
+            beforeEach(async () => {
+                tmpDirectory = TestUtils.copyFixturesToTmpDirectory("empty");
+                console.log("tmpDirectory:", tmpDirectory);
+                await TestUtils.mergeConfig({
+                    cultureInterfacePath: `${tmpDirectory}/**/interfaces/*.ts`,
+                    cultureFilePaths: [`${tmpDirectory}/**/cultures/*.ts`],
+                });
+            });
 
-            // Act
-            const result = await kazoo.addKeyToInterface(key);
+            test("inserts key into interface, returns created key", async () => {
+                // Arrange
+                const key = "testKey";
 
-            // Assert
-            assert.equal(result, key);
+                // Act
+                const result = await kazoo.addKeyToInterface(key);
+
+                // Assert
+                assert.equal(result, key);
+            });
         });
     });
 
