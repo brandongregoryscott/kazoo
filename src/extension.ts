@@ -1,6 +1,9 @@
 import * as vscode from "vscode";
 import { CommandMap } from "./constants/command-map";
 import { ProjectUtils } from "./utilities/project-utils";
+import { addKeyToInterface } from "./commands/add-key-to-interface";
+import { addKeyAndTranslation } from "./commands/add-key-and-translation";
+import { addTranslationToCultureFiles } from "./commands/add-translation-to-culture-files";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,6 +26,12 @@ const deactivate = () => {};
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { activate, deactivate };
+export {
+    activate,
+    addKeyAndTranslation,
+    addKeyToInterface,
+    addTranslationToCultureFiles,
+    deactivate,
+};
 
 // #endregion Exports

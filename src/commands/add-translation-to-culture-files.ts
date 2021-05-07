@@ -29,7 +29,10 @@ const RESOURCES = "resources";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const addTranslationToCultureFiles = async (key?: string) => {
+const addTranslationToCultureFiles = async (
+    key?: string,
+    translation?: string
+) => {
     const cultureInterface = await ProjectUtils.getCultureInterface();
     const cultureFiles = await ProjectUtils.getCultureFiles();
 
@@ -43,16 +46,18 @@ const addTranslationToCultureFiles = async (key?: string) => {
         return;
     }
 
-    const translation = await vscode.window.showInputBox({
-        prompt: `Enter the English copy for key '${key}'`,
-    });
+    if (translation == null) {
+        translation = await vscode.window.showInputBox({
+            prompt: `Enter the English copy for key '${key}'`,
+        });
+    }
 
     if (translation == null) {
         return;
     }
 
     const transformations = cultureFiles.map((file) =>
-        _addTranslationToFile(file, key!, translation)
+        _addTranslationToFile(file, key!, translation!)
     );
 
     await Promise.all(transformations);
