@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { SyntaxKind } from "@ts-morph/common";
 import {
     Identifier,
     Node,
@@ -16,14 +15,8 @@ import { WindowUtils } from "../utilities/window-utils";
 import * as translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
-
-// -----------------------------------------------------------------------------------------
-// #region Constants
-// -----------------------------------------------------------------------------------------
-
-const RESOURCES = "resources";
-
-// #endregion Constants
+import { SourceFileUtils } from "../utilities/source-file-utils";
+import { SharedConstants } from "../constants/shared-constants";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -37,9 +30,9 @@ const addTranslationToCultureFiles = async (
     const cultureFiles = await ProjectUtils.getCultureFiles();
 
     if (key == null) {
-        key = await vscode.window.showInputBox({
-            prompt: `Enter a key from ${cultureInterface.getName()} to insert into the culture files`,
-        });
+        key = await WindowUtils.prompt(
+            `Enter a key from ${cultureInterface.getName()} to insert into the culture files`
+        );
     }
 
     if (key == null) {
@@ -47,9 +40,9 @@ const addTranslationToCultureFiles = async (
     }
 
     if (translation == null) {
-        translation = await vscode.window.showInputBox({
-            prompt: `Enter the English copy for key '${key}'`,
-        });
+        translation = await WindowUtils.prompt(
+            `Enter the English copy for key '${key}'`
+        );
     }
 
     if (translation == null) {
@@ -74,29 +67,8 @@ const _addTranslationToFile = async (
     key: string,
     value: string
 ) => {
-    // Get the first variable exported - we should be able to assume that the exported value is the culture resource
-    const cultureResource = file.getVariableDeclaration((variable) =>
-        variable.isExported()
-    );
-    const initializerArgs =
-        cultureResource
-            ?.getInitializerIfKind(SyntaxKind.CallExpression)
-            ?.getArguments() ?? [];
-    const baseLanguage = NodeUtils.findInitializer(initializerArgs);
-    const resourceInitializer = NodeUtils.findObjectLiteralExpressionWithProperty(
-        initializerArgs,
-        RESOURCES
-    );
-
-    if (resourceInitializer == null) {
-        _errorResourcesNotFound(file);
-        return;
-    }
-
-    const resourceObject = resourceInitializer
-        .getProperty(RESOURCES)
-        ?.getLastChildByKind(SyntaxKind.ObjectLiteralExpression);
-
+    const baseLanguage = SourceFileUtils.getBaseLanguage(file);
+    const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
         _errorResourcesNotFound(file);
         return;
@@ -168,7 +140,9 @@ const _buildNewProperty = async (
 
 const _errorResourcesNotFound = (file: SourceFile) =>
     WindowUtils.error(
-        `Expected to find object literal with key '${RESOURCES}' in ${file.getBaseName()}.`
+        `Expected to find object literal with key '${
+            SharedConstants.RESOURCES
+        }' in ${file.getBaseName()}.`
     );
 
 // #endregion Private Functions

@@ -17,9 +17,9 @@ const addKeyToInterface = async (key?: string) => {
     const cultureInterface = await ProjectUtils.getCultureInterface();
 
     if (key == null) {
-        key = await vscode.window.showInputBox({
-            prompt: `Enter a key to insert into ${cultureInterface.getName()}`,
-        });
+        key = await WindowUtils.prompt(
+            `Enter a key to insert into ${cultureInterface.getName()}`
+        );
     }
 
     if (key == null) {

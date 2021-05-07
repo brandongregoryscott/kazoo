@@ -4,11 +4,20 @@ import * as vscode from "vscode";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const error = (value: string | object) =>
-    _showMessage(value, vscode.window.showErrorMessage);
-
-const info = (value: string | object) =>
-    _showMessage(value, vscode.window.showInformationMessage);
+const WindowUtils = {
+    error(value: string | object) {
+        return _showMessage(value, vscode.window.showErrorMessage);
+    },
+    info(value: string | object) {
+        return _showMessage(value, vscode.window.showInformationMessage);
+    },
+    prompt(prompt: string) {
+        return vscode.window.showInputBox({
+            prompt,
+            ignoreFocusOut: true,
+        });
+    },
+};
 
 // #endregion Public Functions
 
@@ -33,9 +42,6 @@ const _showMessage = (
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export const WindowUtils = {
-    error,
-    info,
-};
+export { WindowUtils };
 
 // #endregion Exports

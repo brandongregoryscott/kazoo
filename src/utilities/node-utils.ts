@@ -46,7 +46,7 @@ const findIndex = (
     return names.indexOf(name);
 };
 
-const findInitializer = (nodes?: Node[]): Identifier | undefined =>
+const findIdentifier = (nodes?: Node[]): Identifier | undefined =>
     nodes?.find((node) => Node.isIdentifier(node)) as Identifier | undefined;
 
 const findObjectLiteralExpressionWithProperty = (
@@ -146,7 +146,7 @@ const _trimPropertyName = (property: Property) =>
 
 export const NodeUtils = {
     findIndex,
-    findInitializer,
+    findIdentifier,
     findObjectLiteralExpressionWithProperty,
     findPropertyByName,
     getPropertyAssignments,

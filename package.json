@@ -2,7 +2,8 @@
     "activationEvents": [
         "onCommand:kazoo.addKeyAndTranslation",
         "onCommand:kazoo.addKeyToInterface",
-        "onCommand:kazoo.addTranslationToCultureFiles"
+        "onCommand:kazoo.addTranslationToCultureFiles",
+        "onCommand:kazoo.replaceTranslationsFromJson"
     ],
     "author": {
         "name": "Brandon Scott",
@@ -27,6 +28,11 @@
                 "category": "kazoo",
                 "command": "kazoo.addTranslationToCultureFiles",
                 "title": "Add translation to culture files"
+            },
+            {
+                "category": "kazoo",
+                "command": "kazoo.replaceTranslationsFromJson",
+                "title": "Replace translations from json file"
             }
         ],
         "configuration": {
