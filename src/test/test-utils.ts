@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { ConfigUtils } from "../utilities/config-utils";
 import * as shell from "shelljs";
 import * as upath from "upath";
+import * as faker from "faker";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -19,7 +20,7 @@ const { defaultConfig } = ConfigUtils;
 const TestUtils = {
     copyFixturesToTmpDirectory(fixture: string): string {
         shell.config.fatal = true;
-        const tmpDirectory = upath.toUnix(shell.tempdir());
+        const tmpDirectory = upath.join("tmp", faker.datatype.uuid());
 
         shell.cp(
             "-R",
@@ -29,11 +30,23 @@ const TestUtils = {
 
         return tmpDirectory;
     },
-    async mergeConfig(updated: Partial<ExtensionConfiguration>) {
+    cleanTmpDirectory(): void {
+        shell.config.fatal = true;
+        shell.rm("-rf", "tmp/*");
+    },
+    getInterfacePath(tmpDirectory: string): string {
+        return upath.join(tmpDirectory, "**", "interfaces", "*.ts");
+    },
+    getCultureFilePaths(tmpDirectory: string): string[] {
+        return [upath.join(tmpDirectory, "**", "cultures", "*.ts")];
+    },
+    async mergeConfig(
+        updated: Partial<ExtensionConfiguration>
+    ): Promise<void[]> {
         const existing = await ConfigUtils.get();
         return this.setConfig({ ...existing, ...updated });
     },
-    async setConfig(updated: ExtensionConfiguration) {
+    async setConfig(updated: ExtensionConfiguration): Promise<void[]> {
         const config = vscode.workspace.getConfiguration(ConfigUtils.key);
         const keys = Object.keys(updated) as Array<
             keyof ExtensionConfiguration
@@ -43,7 +56,7 @@ const TestUtils = {
         );
         return await Promise.all(configUpdates);
     },
-    async resetConfig() {
+    async resetConfig(): Promise<void[]> {
         return this.setConfig(defaultConfig);
     },
 };
