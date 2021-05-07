@@ -3,12 +3,14 @@ import {
     InterfaceDeclaration,
     Node,
     ObjectLiteralExpression,
+    OptionalKind,
     PropertyAssignment,
     PropertyAssignmentStructure,
     PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
 import { Property } from "../types/property";
+import * as _ from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -71,6 +73,29 @@ const isObjectLiteralExpressionWithProperty = (
     property: string
 ): node is ObjectLiteralExpression =>
     Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
+
+const updateProperties = (
+    existing: Property[],
+    updated: Array<OptionalKind<PropertyAssignmentStructure>>
+) => {
+    const propertiesToUpdate = _.intersectionWith(
+        existing,
+        updated,
+        (existing, updated) => existing.getName() === updated.name
+    );
+
+    propertiesToUpdate.forEach((existingProperty) => {
+        const updatedProperty = updated.find(
+            (updatedProperty) =>
+                updatedProperty.name === existingProperty.getName()
+        );
+        if (updatedProperty == null) {
+            return;
+        }
+
+        existingProperty.setInitializer(updatedProperty.initializer);
+    });
+};
 
 const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
@@ -151,6 +176,7 @@ export const NodeUtils = {
     findPropertyByName,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
+    updateProperties,
     shouldQuoteEscapeNewProperty,
     sortPropertiesByName,
     sortPropertyAssignments,

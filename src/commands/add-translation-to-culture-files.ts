@@ -110,7 +110,7 @@ const _buildNewProperty = async (
         baseLanguage?.getText()
     );
 
-    let property: OptionalKind<PropertyAssignmentStructure> = {
+    const property: OptionalKind<PropertyAssignmentStructure> = {
         name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
         initializer: StringUtils.quoteEscape(value),
     };
