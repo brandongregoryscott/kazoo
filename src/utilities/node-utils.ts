@@ -11,6 +11,7 @@ import {
 import { InsertionPosition } from "../enums/insertion-position";
 import { Property } from "../types/property";
 import * as _ from "lodash";
+import { StringUtils } from "./string-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -73,6 +74,15 @@ const isObjectLiteralExpressionWithProperty = (
     property: string
 ): node is ObjectLiteralExpression =>
     Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
+
+const mapToPropertyAssignments = (
+    object: Record<string, string>,
+    existingProperties: Property[]
+): Array<OptionalKind<PropertyAssignmentStructure>> =>
+    Object.entries(object).map(([key, value]) => ({
+        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+        initializer: StringUtils.quoteEscape(value),
+    }));
 
 const updateProperties = (
     existing: Property[],
@@ -176,6 +186,7 @@ export const NodeUtils = {
     findPropertyByName,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
+    mapToPropertyAssignments,
     updateProperties,
     shouldQuoteEscapeNewProperty,
     sortPropertiesByName,

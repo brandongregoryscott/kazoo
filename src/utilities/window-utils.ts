@@ -1,15 +1,30 @@
+import { SourceFile } from "ts-morph";
 import * as vscode from "vscode";
+import { SharedConstants } from "../constants/shared-constants";
+
+// -----------------------------------------------------------------------------------------
+// #region Constants
+// -----------------------------------------------------------------------------------------
+
+const { RESOURCES } = SharedConstants;
+
+// #endregion Constants
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
 const WindowUtils = {
-    error(value: string | object) {
-        return _showMessage(value, vscode.window.showErrorMessage);
+    error(value: string) {
+        return vscode.window.showErrorMessage(value);
     },
-    info(value: string | object) {
-        return _showMessage(value, vscode.window.showInformationMessage);
+    errorResourcesNotFound(file: SourceFile) {
+        const fileName = file.getBaseName();
+        const message = `Expected to find object literal with key '${RESOURCES}' in ${fileName}.`;
+        return this.error(message);
+    },
+    info(value: string) {
+        return vscode.window.showInformationMessage(value);
     },
     prompt(prompt: string) {
         return vscode.window.showInputBox({
@@ -17,26 +32,17 @@ const WindowUtils = {
             ignoreFocusOut: true,
         });
     },
+    selection(options: string[]) {
+        return vscode.window.showQuickPick(options, {
+            ignoreFocusOut: true,
+        });
+    },
+    warning(value: string) {
+        return vscode.window.showWarningMessage(value);
+    },
 };
 
 // #endregion Public Functions
-
-// -----------------------------------------------------------------------------------------
-// #region Private Functions
-// -----------------------------------------------------------------------------------------
-
-const _showMessage = (
-    value: string | object,
-    fn: (message: string, ...items: string[]) => Thenable<string | undefined>
-) => {
-    if (typeof value !== "string") {
-        value = JSON.stringify(value);
-    }
-
-    return fn(value);
-};
-
-// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports

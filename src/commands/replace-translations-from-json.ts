@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
 import { WindowUtils } from "../utilities/window-utils";
 import * as fs from "fs";
@@ -14,6 +13,17 @@ import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 
 // -----------------------------------------------------------------------------------------
+// #region Constants
+// -----------------------------------------------------------------------------------------
+
+const ERROR_FILE_MUST_BE_JSON =
+    "The file path or pattern provided must end with a .json extension.";
+
+const CULTURE_FILE_UPDATED = "Successfully updated culture file!";
+
+// #endregion Constants
+
+// -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
@@ -21,13 +31,38 @@ const replaceTranslationsFromJson = async (
     cultureFilePath?: string,
     jsonFilePath?: string
 ) => {
+    const cultureFile = await _getCultureFileToUpdate(cultureFilePath);
+    if (cultureFile == null) {
+        return;
+    }
+
+    const translations = await _getTranslationsFromJsonFile(
+        cultureFile.getFilePath(),
+        jsonFilePath
+    );
+    if (translations == null) {
+        return;
+    }
+
+    await _replaceTranslations(translations, cultureFile);
+
+    WindowUtils.info(CULTURE_FILE_UPDATED);
+};
+
+// #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const _getCultureFileToUpdate = async (
+    cultureFilePath?: string
+): Promise<SourceFile | undefined> => {
     const cultureFiles = await ProjectUtils.getCultureFiles();
     const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
 
     if (cultureFilePath == null) {
-        cultureFilePath = await vscode.window.showQuickPick(cultureFilePaths, {
-            ignoreFocusOut: true,
-        });
+        cultureFilePath = await WindowUtils.selection(cultureFilePaths);
     }
 
     const cultureFile = cultureFiles.find(
@@ -38,6 +73,13 @@ const replaceTranslationsFromJson = async (
         return;
     }
 
+    return cultureFile;
+};
+
+const _getTranslationsFromJsonFile = async (
+    cultureFilePath: string,
+    jsonFilePath?: string
+): Promise<Record<string, string> | undefined> => {
     if (jsonFilePath == null) {
         jsonFilePath = await WindowUtils.prompt(
             `Enter a path/glob pattern to the JSON file to merge into ${cultureFilePath}`
@@ -48,30 +90,13 @@ const replaceTranslationsFromJson = async (
         return;
     }
 
-    const translations = await _parseJsonFile(jsonFilePath);
-    if (translations == null) {
+    if (!jsonFilePath.endsWith(".json")) {
+        WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
         return;
     }
 
-    await _replaceTranslations(translations, cultureFile);
+    return _parseJsonFile(jsonFilePath);
 };
-
-// #endregion Public Functions
-
-// -----------------------------------------------------------------------------------------
-// #region Private Functions
-// -----------------------------------------------------------------------------------------
-
-const _mapToPropertyAssignments = (
-    translations: Record<string, string>,
-    existingProperties: Property[]
-): Array<OptionalKind<PropertyAssignmentStructure>> =>
-    Object.entries(translations).map(([key, value]) => {
-        return {
-            name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
-            initializer: StringUtils.quoteEscape(value),
-        };
-    });
 
 const _parseJsonFile = async (
     pathOrPattern: string
@@ -91,13 +116,12 @@ const _replaceTranslations = async (
 ) => {
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        // BSCOTT: Throw error here, or handle this scenario differently?
+        WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
     const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
-
-    const updatedProperties = _mapToPropertyAssignments(
+    const updatedProperties = NodeUtils.mapToPropertyAssignments(
         translations,
         existingProperties
     );
