@@ -121,14 +121,14 @@
         "build:dist": "npm run esbuild -- --minify",
         "clean": "rimraf dist **/tmp/*",
         "lint": "eslint src --ext ts",
-        "postpublish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
+        "postvscode:publish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
         "pretest": "npm run build && npm run lint",
         "prevscode:publish": "npm run build:dist",
         "test": "node ./dist/test/runTest.js",
         "vscode:pack": "vsce package",
-        "vscode:publish": "npm run vscode:package && vsce publish",
+        "vscode:publish": "npm run vscode:pack && vsce publish",
         "watch": "npm run esbuild -- --sourcemap --watch"
     },
-    "version": "0.1.0"
+    "version": "0.1.1"
 }
