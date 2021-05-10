@@ -46,7 +46,7 @@ const replaceTranslationsFromJson = async (
 
     await _replaceTranslations(translations, cultureFile);
 
-    WindowUtils.info(CULTURE_FILE_UPDATED);
+    await WindowUtils.info(CULTURE_FILE_UPDATED);
 };
 
 // #endregion Public Functions
@@ -126,9 +126,30 @@ const _replaceTranslations = async (
         existingProperties
     );
 
-    NodeUtils.updateProperties(existingProperties, updatedProperties);
+    const { extraProperties } = NodeUtils.updateProperties(
+        existingProperties,
+        updatedProperties
+    );
 
-    return file.save();
+    await file.save();
+
+    if (extraProperties.length > 0) {
+        await WindowUtils.warning(_getExtraKeysWarning(extraProperties));
+    }
+};
+
+const _getExtraKeysWarning = (extraProperties: string[]): string => {
+    const { length: count } = extraProperties;
+    const keys = extraProperties.join(", ");
+
+    const baseWarning = `Found ${count} keys in JSON file that are not in the source`;
+
+    // Outputting over 5 keys could get messy with a toast.
+    if (extraProperties.length > 5) {
+        return baseWarning;
+    }
+
+    return `${baseWarning}:\n${keys}`;
 };
 
 // #endregion Private Functions

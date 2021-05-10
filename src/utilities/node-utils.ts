@@ -14,6 +14,20 @@ import * as _ from "lodash";
 import { StringUtils } from "./string-utils";
 
 // -----------------------------------------------------------------------------------------
+// #region Interfaces
+// -----------------------------------------------------------------------------------------
+
+interface UpdatePropertiesResult {
+    /**
+     * Properties found in the 'updated' collection that do not exist in the original collection
+     */
+    extraProperties: string[];
+    updatedProperties: string[];
+}
+
+// #endregion Interfaces
+
+// -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
@@ -87,24 +101,41 @@ const mapToPropertyAssignments = (
 const updateProperties = (
     existing: Property[],
     updated: Array<OptionalKind<PropertyAssignmentStructure>>
-) => {
+): UpdatePropertiesResult => {
+    const compareByName = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) => existing.getName() === updated.name;
     const propertiesToUpdate = _.intersectionWith(
         existing,
         updated,
-        (existing, updated) => existing.getName() === updated.name
+        compareByName
+    );
+    const extraProperties = _.differenceWith(
+        updated,
+        existing,
+        (updated, existing) => compareByName(existing, updated)
     );
 
-    propertiesToUpdate.forEach((existingProperty) => {
-        const updatedProperty = updated.find(
-            (updatedProperty) =>
-                updatedProperty.name === existingProperty.getName()
+    const updateProperty = (existingProperty: Property) => {
+        const updatedProperty = updated.find((updatedProperty) =>
+            compareByName(existingProperty, updatedProperty)
         );
         if (updatedProperty == null) {
             return;
         }
 
         existingProperty.setInitializer(updatedProperty.initializer);
-    });
+    };
+
+    propertiesToUpdate.forEach(updateProperty);
+
+    return {
+        extraProperties: extraProperties.map((property) => property.name),
+        updatedProperties: propertiesToUpdate.map((property) =>
+            property.getName()
+        ),
+    };
 };
 
 const sortPropertyAssignments = (
