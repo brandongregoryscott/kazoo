@@ -84,6 +84,7 @@
         "@types/vscode": "1.54.0",
         "@typescript-eslint/eslint-plugin": "4.14.1",
         "@typescript-eslint/parser": "4.14.1",
+        "esbuild": "0.11.20",
         "eslint": "7.19.0",
         "faker": "5.5.3",
         "glob": "7.1.6",
@@ -115,16 +116,19 @@
         "url": "https://github.com/brandongregoryscott/kazoo.git"
     },
     "scripts": {
-        "build": "tsc --pretty --project tsconfig.json",
+        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
+        "build": "npm run esbuild -- --sourcemap",
+        "build:dist": "npm run esbuild -- --minify",
         "clean": "rimraf dist **/tmp/*",
         "lint": "eslint src --ext ts",
         "postpublish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
         "pretest": "npm run build && npm run lint",
-        "prevscode:publish": "npm run build",
+        "prevscode:publish": "npm run build:dist",
         "test": "node ./dist/test/runTest.js",
-        "vscode:publish": "vsce package && vsce publish",
-        "watch": "tsc --pretty --watch --project tsconfig.json"
+        "vscode:pack": "vsce package",
+        "vscode:publish": "npm run vscode:package && vsce publish",
+        "watch": "npm run esbuild -- --sourcemap --watch"
     },
     "version": "0.1.0"
 }
