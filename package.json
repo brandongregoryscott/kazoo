@@ -121,9 +121,10 @@
         "postpublish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
         "pretest": "npm run build && npm run lint",
+        "prevscode:publish": "npm run build",
         "test": "node ./dist/test/runTest.js",
-        "vscode:prepublish": "npm run build",
+        "vscode:publish": "vsce package && vsce publish",
         "watch": "tsc --pretty --watch --project tsconfig.json"
     },
-    "version": "0.0.1"
+    "version": "0.1.0"
 }
