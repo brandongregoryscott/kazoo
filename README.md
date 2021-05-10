@@ -24,6 +24,12 @@ VS Code extension to ease the burden of adding localized keys and strings to mul
 
 ![Add translation to culture files](examples/add-translation-to-culture-files.gif)
 
+-   Replace translations from JSON
+
+    -   Prompts the user to select a culture file to update with values from a JSON object in the same structure.
+
+![Replace translations from JSON](examples/replace-translations-from-json.gif)
+
 ## Requirements
 
 -   Assumes the culture files are initialized using an object in the structure of the [`Culture`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core/blob/main/src/interfaces/culture.ts) interface from [`andculturecode-javascript-core`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core)
