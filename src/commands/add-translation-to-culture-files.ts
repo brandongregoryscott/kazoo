@@ -1,8 +1,6 @@
-import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
 import {
     Identifier,
-    Node,
     OptionalKind,
     PropertyAssignmentStructure,
     SourceFile,
@@ -16,7 +14,6 @@ import * as translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
 import { SourceFileUtils } from "../utilities/source-file-utils";
-import { SharedConstants } from "../constants/shared-constants";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -70,7 +67,7 @@ const _addTranslationToFile = async (
     const baseLanguage = SourceFileUtils.getBaseLanguage(file);
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        _errorResourcesNotFound(file);
+        await WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
@@ -137,13 +134,6 @@ const _buildNewProperty = async (
 
     return property;
 };
-
-const _errorResourcesNotFound = (file: SourceFile) =>
-    WindowUtils.error(
-        `Expected to find object literal with key '${
-            SharedConstants.RESOURCES
-        }' in ${file.getBaseName()}.`
-    );
 
 // #endregion Private Functions
 

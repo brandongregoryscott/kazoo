@@ -2,13 +2,7 @@ import { ProjectUtils } from "../utilities/project-utils";
 import { WindowUtils } from "../utilities/window-utils";
 import * as fs from "fs";
 import { FileUtils } from "../utilities/file-utils";
-import {
-    OptionalKind,
-    PropertyAssignmentStructure,
-    SourceFile,
-} from "ts-morph";
-import { StringUtils } from "../utilities/string-utils";
-import { Property } from "../types/property";
+import { SourceFile } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 
@@ -16,10 +10,11 @@ import { NodeUtils } from "../utilities/node-utils";
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
+const CULTURE_FILE_UPDATED = "Successfully updated culture file!";
 const ERROR_FILE_MUST_BE_JSON =
     "The file path or pattern provided must end with a .json extension.";
-
-const CULTURE_FILE_UPDATED = "Successfully updated culture file!";
+const ERROR_UPDATING_CULTURE_FILE =
+    "There was an error updating the culture file.";
 
 // #endregion Constants
 
@@ -44,9 +39,17 @@ const replaceTranslationsFromJson = async (
         return;
     }
 
-    await _replaceTranslations(translations, cultureFile);
+    const updateResult = await _replaceTranslations(translations, cultureFile);
+    if (updateResult == null) {
+        return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
+    }
 
-    await WindowUtils.info(CULTURE_FILE_UPDATED);
+    const { extraProperties } = updateResult;
+    if (extraProperties.length > 0) {
+        return await WindowUtils.warning(_getExtraKeysWarning(extraProperties));
+    }
+
+    return await WindowUtils.info(CULTURE_FILE_UPDATED);
 };
 
 // #endregion Public Functions
@@ -126,16 +129,14 @@ const _replaceTranslations = async (
         existingProperties
     );
 
-    const { extraProperties } = NodeUtils.updateProperties(
+    const updateResult = NodeUtils.updateProperties(
         existingProperties,
         updatedProperties
     );
 
     await file.save();
 
-    if (extraProperties.length > 0) {
-        await WindowUtils.warning(_getExtraKeysWarning(extraProperties));
-    }
+    return updateResult;
 };
 
 const _getExtraKeysWarning = (extraProperties: string[]): string => {

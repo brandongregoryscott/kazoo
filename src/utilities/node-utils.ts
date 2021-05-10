@@ -218,11 +218,11 @@ export const NodeUtils = {
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
     mapToPropertyAssignments,
-    updateProperties,
     shouldQuoteEscapeNewProperty,
     sortPropertiesByName,
     sortPropertyAssignments,
     sortPropertySignatures,
+    updateProperties,
 };
 
 // #endregion Exports
