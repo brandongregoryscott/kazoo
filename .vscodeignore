@@ -1,5 +1,6 @@
 .github/**
 .gitignore
+.prettierignore
 .vscode-test/**
 .vscode/**
 .yarnrc
@@ -9,6 +10,7 @@
 **/*.ts
 **/test/*
 **/tsconfig.json
+assets/banner.png
 esbuild.js
 examples/**
 node_modules
