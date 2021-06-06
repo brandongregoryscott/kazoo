@@ -21,7 +21,8 @@ interface UpdatePropertiesResult {
     /**
      * Properties found in the 'updated' collection that do not exist in the original collection
      */
-    extraProperties: string[];
+    notFoundProperties: string[];
+    unmodifiedProperties: string[];
     updatedProperties: string[];
 }
 
@@ -102,15 +103,35 @@ const updateProperties = (
     existing: Property[],
     updated: Array<OptionalKind<PropertyAssignmentStructure>>
 ): UpdatePropertiesResult => {
+    const diffByInitializer = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) => existing.getInitializer()?.getText() !== updated.initializer;
+
     const compareByName = (
         existing: Property,
         updated: OptionalKind<PropertyAssignmentStructure>
     ) => existing.getName() === updated.name;
+
+    const diffByNameAndInitializer = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) =>
+        compareByName(existing, updated) &&
+        diffByInitializer(existing, updated);
+
     const propertiesToUpdate = _.intersectionWith(
         existing,
         updated,
-        compareByName
+        diffByNameAndInitializer
     );
+
+    const unmodifiedProperties = _.differenceWith(
+        existing,
+        updated,
+        diffByNameAndInitializer
+    );
+
     const extraProperties = _.differenceWith(
         updated,
         existing,
@@ -131,7 +152,10 @@ const updateProperties = (
     propertiesToUpdate.forEach(updateProperty);
 
     return {
-        extraProperties: extraProperties.map((property) => property.name),
+        notFoundProperties: extraProperties.map((property) => property.name),
+        unmodifiedProperties: unmodifiedProperties.map((property) =>
+            property.getName()
+        ),
         updatedProperties: propertiesToUpdate.map((property) =>
             property.getName()
         ),
