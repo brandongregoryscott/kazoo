@@ -16,3 +16,4 @@ examples/**
 node_modules
 src/**
 vsc-extension-quickstart.md
+*.txt

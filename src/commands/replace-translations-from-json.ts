@@ -6,6 +6,7 @@ import { SourceFile } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import _ from "lodash";
+import { log } from "../utilities/log";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -58,7 +59,7 @@ const replaceTranslationsFromJson = async (
 
         return await WindowUtils.info(CULTURE_FILE_UPDATED);
     } catch (error) {
-        console.log(`${replaceTranslationsFromJson.name}: ${error.message}`);
+        log.error(`${replaceTranslationsFromJson.name}: ${error.message}`);
         await WindowUtils.error(
             `There was an error running ${replaceTranslationsFromJson.name}, see console for more detail.`
         );
