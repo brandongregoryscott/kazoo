@@ -50,10 +50,10 @@ const replaceTranslationsFromJson = async (
             return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
         }
 
-        const { notFoundProperties: extraProperties } = updateResult;
-        if (extraProperties.length > 0) {
+        const { notFoundProperties } = updateResult;
+        if (notFoundProperties.length > 0) {
             return await WindowUtils.warning(
-                _getExtraKeysWarning(extraProperties)
+                _getExtraKeysWarning(notFoundProperties)
             );
         }
 
@@ -93,18 +93,18 @@ const _getCultureFileToUpdate = async (
     return cultureFile;
 };
 
-const _getExtraKeysWarning = (extraProperties: string[]): string => {
-    const { length: count } = extraProperties;
-    const keys = extraProperties.join(", ");
+const _getExtraKeysWarning = (notFoundProperties: string[]): string => {
+    const { length: count } = notFoundProperties;
+    const keys = notFoundProperties.join(", ");
 
-    const baseWarning = `Found ${count} keys in JSON file that are not in the source`;
+    const warning = `Found ${count} keys in JSON file that are not in the source`;
 
     // Outputting over 5 keys could get messy with a toast.
-    if (extraProperties.length > 5) {
-        return baseWarning;
+    if (notFoundProperties.length > 5) {
+        return warning;
     }
 
-    return `${baseWarning}:\n${keys}`;
+    return `${warning}:\n${keys}`;
 };
 
 const _getTranslationsFromJsonFile = async (
