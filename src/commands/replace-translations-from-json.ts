@@ -6,7 +6,7 @@ import { SourceFile } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import _ from "lodash";
-import { log } from "../utilities/log";
+import { CoreUtils } from "../utilities/core-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -59,10 +59,7 @@ const replaceTranslationsFromJson = async (
 
         return await WindowUtils.info(CULTURE_FILE_UPDATED);
     } catch (error) {
-        log.error(`${replaceTranslationsFromJson.name}: ${error.message}`);
-        await WindowUtils.error(
-            `There was an error running ${replaceTranslationsFromJson.name}, see console for more detail.`
-        );
+        return await CoreUtils.catch(replaceTranslationsFromJson, error);
     }
 };
 
@@ -122,7 +119,7 @@ const _getTranslationsFromJsonFile = async (
     }
 
     if (!jsonFilePath.endsWith(".json")) {
-        WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
+        await WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
         return;
     }
 
@@ -151,7 +148,7 @@ const _replaceTranslations = async (
 ) => {
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        WindowUtils.errorResourcesNotFound(file);
+        await WindowUtils.errorResourcesNotFound(file);
         return;
     }
 

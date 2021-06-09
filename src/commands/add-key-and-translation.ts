@@ -1,3 +1,4 @@
+import { CoreUtils } from "../utilities/core-utils";
 import { addKeyToInterface } from "./add-key-to-interface";
 import { addTranslationToCultureFiles } from "./add-translation-to-culture-files";
 
@@ -6,12 +7,16 @@ import { addTranslationToCultureFiles } from "./add-translation-to-culture-files
 // -----------------------------------------------------------------------------------------
 
 const addKeyAndTranslation = async (key?: string, translation?: string) => {
-    key = await addKeyToInterface(key);
-    if (key == null) {
-        return;
-    }
+    try {
+        key = await addKeyToInterface(key);
+        if (key == null) {
+            return;
+        }
 
-    await addTranslationToCultureFiles(key, translation);
+        return await addTranslationToCultureFiles(key, translation);
+    } catch (error) {
+        return await CoreUtils.catch(addKeyAndTranslation, error);
+    }
 };
 
 // #endregion Public Functions
