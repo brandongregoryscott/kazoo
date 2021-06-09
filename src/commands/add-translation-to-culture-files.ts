@@ -14,6 +14,7 @@ import translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
 import { SourceFileUtils } from "../utilities/source-file-utils";
+import { CoreUtils } from "../utilities/core-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,34 +24,38 @@ const addTranslationToCultureFiles = async (
     key?: string,
     translation?: string
 ) => {
-    const cultureInterface = await ProjectUtils.getCultureInterface();
-    const cultureFiles = await ProjectUtils.getCultureFiles();
+    try {
+        const cultureInterface = await ProjectUtils.getCultureInterface();
+        const cultureFiles = await ProjectUtils.getCultureFiles();
 
-    if (key == null) {
-        key = await WindowUtils.prompt(
-            `Enter a key from ${cultureInterface.getName()} to insert into the culture files`
+        if (key == null) {
+            key = await WindowUtils.prompt(
+                `Enter a key from ${cultureInterface.getName()} to insert into the culture files`
+            );
+        }
+
+        if (key == null) {
+            return;
+        }
+
+        if (translation == null) {
+            translation = await WindowUtils.prompt(
+                `Enter the English copy for key '${key}'`
+            );
+        }
+
+        if (translation == null) {
+            return;
+        }
+
+        const transformations = cultureFiles.map((file) =>
+            _addTranslationToFile(file, key!, translation!)
         );
+
+        await Promise.all(transformations);
+    } catch (error) {
+        return await CoreUtils.catch(addTranslationToCultureFiles, error);
     }
-
-    if (key == null) {
-        return;
-    }
-
-    if (translation == null) {
-        translation = await WindowUtils.prompt(
-            `Enter the English copy for key '${key}'`
-        );
-    }
-
-    if (translation == null) {
-        return;
-    }
-
-    const transformations = cultureFiles.map((file) =>
-        _addTranslationToFile(file, key!, translation!)
-    );
-
-    await Promise.all(transformations);
 };
 
 // #endregion Public Functions
@@ -127,7 +132,7 @@ const _buildNewProperty = async (
             initializer: StringUtils.quoteEscape(translationResult.text),
         };
     } catch (error) {
-        WindowUtils.error(
+        await WindowUtils.error(
             `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`
         );
     }

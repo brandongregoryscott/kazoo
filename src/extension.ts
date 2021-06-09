@@ -1,3 +1,4 @@
+import "anylogger-log4js";
 import * as vscode from "vscode";
 import { CommandMap } from "./constants/command-map";
 import { ProjectUtils } from "./utilities/project-utils";

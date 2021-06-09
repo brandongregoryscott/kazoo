@@ -72,7 +72,10 @@
     },
     "dependencies": {
         "@vitalets/google-translate-api": "5.1.0",
+        "anylogger": "1.0.11",
+        "anylogger-log4js": "0.2.0",
         "lodash": "4.17.21",
+        "log4js": "6.3.0",
         "ts-morph": "10.0.1"
     },
     "description": "Ease the burden of adding localized keys and strings to multiple typed culture files",

@@ -5,6 +5,8 @@ import { FileUtils } from "../utilities/file-utils";
 import { SourceFile } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
+import _ from "lodash";
+import { CoreUtils } from "../utilities/core-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -26,30 +28,39 @@ const replaceTranslationsFromJson = async (
     cultureFilePath?: string,
     jsonFilePath?: string
 ) => {
-    const cultureFile = await _getCultureFileToUpdate(cultureFilePath);
-    if (cultureFile == null) {
-        return;
-    }
+    try {
+        const cultureFile = await _getCultureFileToUpdate(cultureFilePath);
+        if (cultureFile == null) {
+            return;
+        }
 
-    const translations = await _getTranslationsFromJsonFile(
-        cultureFile.getFilePath(),
-        jsonFilePath
-    );
-    if (translations == null) {
-        return;
-    }
+        const translations = await _getTranslationsFromJsonFile(
+            cultureFile.getFilePath(),
+            jsonFilePath
+        );
+        if (translations == null) {
+            return;
+        }
 
-    const updateResult = await _replaceTranslations(translations, cultureFile);
-    if (updateResult == null) {
-        return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
-    }
+        const updateResult = await _replaceTranslations(
+            translations,
+            cultureFile
+        );
+        if (updateResult == null) {
+            return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
+        }
 
-    const { extraProperties } = updateResult;
-    if (extraProperties.length > 0) {
-        return await WindowUtils.warning(_getExtraKeysWarning(extraProperties));
-    }
+        const { notFoundProperties } = updateResult;
+        if (notFoundProperties.length > 0) {
+            return await WindowUtils.warning(
+                _getExtraKeysWarning(notFoundProperties)
+            );
+        }
 
-    return await WindowUtils.info(CULTURE_FILE_UPDATED);
+        return await WindowUtils.info(CULTURE_FILE_UPDATED);
+    } catch (error) {
+        return await CoreUtils.catch(replaceTranslationsFromJson, error);
+    }
 };
 
 // #endregion Public Functions
@@ -79,6 +90,20 @@ const _getCultureFileToUpdate = async (
     return cultureFile;
 };
 
+const _getExtraKeysWarning = (notFoundProperties: string[]): string => {
+    const { length: count } = notFoundProperties;
+    const keys = notFoundProperties.join(", ");
+
+    const warning = `Found ${count} keys in JSON file that are not in the source`;
+
+    // Outputting over 5 keys could get messy with a toast.
+    if (notFoundProperties.length > 5) {
+        return warning;
+    }
+
+    return `${warning}:\n${keys}`;
+};
+
 const _getTranslationsFromJsonFile = async (
     cultureFilePath: string,
     jsonFilePath?: string
@@ -94,7 +119,7 @@ const _getTranslationsFromJsonFile = async (
     }
 
     if (!jsonFilePath.endsWith(".json")) {
-        WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
+        await WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
         return;
     }
 
@@ -106,8 +131,12 @@ const _parseJsonFile = async (
 ): Promise<Record<string, string> | undefined> => {
     try {
         const path = await FileUtils.findFirst(pathOrPattern);
-        const file = fs.readFileSync(path!);
-        return JSON.parse(file.toString());
+        const fileContents = fs.readFileSync(path!);
+        const parsedObject: Record<string, string> = JSON.parse(
+            fileContents.toString()
+        );
+
+        return _sanitizeParsedJson(parsedObject);
     } catch (error) {
         WindowUtils.error(error);
     }
@@ -119,7 +148,7 @@ const _replaceTranslations = async (
 ) => {
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        WindowUtils.errorResourcesNotFound(file);
+        await WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
@@ -139,18 +168,19 @@ const _replaceTranslations = async (
     return updateResult;
 };
 
-const _getExtraKeysWarning = (extraProperties: string[]): string => {
-    const { length: count } = extraProperties;
-    const keys = extraProperties.join(", ");
+const _sanitizeParsedJson = (
+    object: Record<string, string>
+): Record<string, string> => {
+    const clonedObject = Object.assign({}, object);
+    Object.entries(clonedObject).map(([key, value]) => {
+        if (!value.includes('"')) {
+            return;
+        }
 
-    const baseWarning = `Found ${count} keys in JSON file that are not in the source`;
+        clonedObject[key] = value.replace(/"/gi, '\\"');
+    });
 
-    // Outputting over 5 keys could get messy with a toast.
-    if (extraProperties.length > 5) {
-        return baseWarning;
-    }
-
-    return `${baseWarning}:\n${keys}`;
+    return clonedObject;
 };
 
 // #endregion Private Functions
