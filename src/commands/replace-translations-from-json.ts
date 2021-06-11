@@ -7,6 +7,7 @@ import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import _ from "lodash";
 import { CoreUtils } from "../utilities/core-utils";
+import readXlsxFile from "read-excel-file";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
