@@ -12,21 +12,7 @@ import { InsertionPosition } from "../enums/insertion-position";
 import { Property } from "../types/property";
 import * as _ from "lodash";
 import { StringUtils } from "./string-utils";
-
-// -----------------------------------------------------------------------------------------
-// #region Interfaces
-// -----------------------------------------------------------------------------------------
-
-interface UpdatePropertiesResult {
-    /**
-     * Properties found in the 'updated' collection that do not exist in the original collection
-     */
-    notFoundProperties: string[];
-    unmodifiedProperties: string[];
-    updatedProperties: string[];
-}
-
-// #endregion Interfaces
+import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -132,7 +118,7 @@ const updateProperties = (
         diffByNameAndInitializer
     );
 
-    const extraProperties = _.differenceWith(
+    const notFoundProperties = _.differenceWith(
         updated,
         existing,
         (updated, existing) => compareByName(existing, updated)
@@ -152,13 +138,9 @@ const updateProperties = (
     propertiesToUpdate.forEach(updateProperty);
 
     return {
-        notFoundProperties: extraProperties.map((property) => property.name),
-        unmodifiedProperties: unmodifiedProperties.map((property) =>
-            property.getName()
-        ),
-        updatedProperties: propertiesToUpdate.map((property) =>
-            property.getName()
-        ),
+        notFound: notFoundProperties.map((property) => property.name),
+        unmodified: unmodifiedProperties.map((property) => property.getName()),
+        updated: propertiesToUpdate.map((property) => property.getName()),
     };
 };
 

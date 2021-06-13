@@ -1,7 +1,7 @@
 import { addKeyAndTranslation } from "../commands/add-key-and-translation";
 import { addKeyToInterface } from "../commands/add-key-to-interface";
 import { addTranslationToCultureFiles } from "../commands/add-translation-to-culture-files";
-import { replaceTranslationsFromJson } from "../commands/replace-translations-from-json";
+import { replaceTranslationsFromFile } from "../commands/replace-translations-from-file";
 import { Commands } from "./commands";
 
 // -----------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ const CommandMap: Record<string, (...args: any[]) => any> = {
     [Commands.addKeyAndTranslation]: addKeyAndTranslation,
     [Commands.addKeyToInterface]: addKeyToInterface,
     [Commands.addTranslationToCultureFiles]: addTranslationToCultureFiles,
-    [Commands.replaceTranslationsFromJson]: replaceTranslationsFromJson,
+    [Commands.replaceTranslationsFromFile]: replaceTranslationsFromFile,
 };
 
 // #endregion Constants

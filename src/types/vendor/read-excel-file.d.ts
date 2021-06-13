@@ -1,6 +1,5 @@
 declare module "read-excel-file" {
-    // import { PathLike } from 'fs'
-    // import { Stream } from 'stream'
+    import { Stream } from "stream";
 
     type BasicType =
         | string
@@ -53,9 +52,7 @@ declare module "read-excel-file" {
     type Cell = string | number | boolean | typeof Date;
     export type Row = Cell[];
 
-    type InputBrowser = File;
-    type InputNode = any; // Stream | PathLike // (string|Stream|Buffer)
-    export type Input = InputBrowser | InputNode;
+    export type Input = string | Stream | Buffer;
 
     export interface ParsedObjectsResult {
         rows: object[];
