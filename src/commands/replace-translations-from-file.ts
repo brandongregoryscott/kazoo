@@ -17,8 +17,7 @@ import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 // -----------------------------------------------------------------------------------------
 
 const CULTURE_FILE_UPDATED = "Successfully updated culture file!";
-const ERROR_FILETYPE_UNSUPPORTED =
-    "The file path or pattern provided must end with a .json or .xlsx extension.";
+const ERROR_NO_SUPPORTED_FILES_FOUND = "No .xlsx or .json files were found.";
 const ERROR_UPDATING_CULTURE_FILE =
     "There was an error updating the culture file.";
 
@@ -54,11 +53,7 @@ const replaceTranslationsFromFile = async (
             return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
         }
 
-        log.info(
-            `Successfully updated ${cultureFile.getBaseName()}. ${_formatUpdateResult(
-                updateResult
-            )}`
-        );
+        log.info(_formatUpdateResult(updateResult));
 
         const { notFound } = updateResult;
         if (notFound.length > 0) {
@@ -90,11 +85,21 @@ const _getCultureFileToUpdate = async (
         cultureFilePath = await WindowUtils.selection(cultureFilePaths);
     }
 
+    if (cultureFilePath == null) {
+        log.debug("No cultureFilePath entered - not continuing.");
+        return;
+    }
+
     const cultureFile = cultureFiles.find(
         (file) => file.getFilePath() === cultureFilePath
     );
 
-    if (cultureFilePath == null || cultureFile == null) {
+    if (cultureFile == null) {
+        log.warn(
+            "cultureFile was unexpectedly null",
+            cultureFilePath,
+            cultureFile
+        );
         return;
     }
 
@@ -119,21 +124,17 @@ const _getTranslationsFromJsonFile = async (
     cultureFilePath: string,
     inputFilePath?: string
 ): Promise<Record<string, string> | undefined> => {
-    if (inputFilePath == null) {
-        inputFilePath = await WindowUtils.prompt(
-            `Enter a path/glob pattern to the file to merge into ${cultureFilePath}`
-        );
+    const inputFiles = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
+    if (inputFiles.length < 1) {
+        await WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
     }
 
     if (inputFilePath == null) {
-        return;
+        inputFilePath = await WindowUtils.selection(inputFiles);
     }
 
-    if (
-        !StringUtils.isExcelFile(inputFilePath) &&
-        !StringUtils.isJsonFile(inputFilePath)
-    ) {
-        await WindowUtils.error(ERROR_FILETYPE_UNSUPPORTED);
+    if (inputFilePath == null) {
+        log.debug("No inputFilePath entered - not continuing.");
         return;
     }
 
@@ -141,24 +142,19 @@ const _getTranslationsFromJsonFile = async (
 };
 
 const _parseFile = async (
-    pathOrPattern: string
+    filePath: string
 ): Promise<Record<string, string> | undefined> => {
     try {
-        const path = await FileUtils.findFirst(pathOrPattern);
-        if (path == null) {
-            return;
-        }
-        const fileContents = fs.readFileSync(path);
-
+        const fileContents = fs.readFileSync(filePath);
         const parsedValues: Record<string, string> = StringUtils.isJsonFile(
-            path
+            filePath
         )
             ? JSON.parse(fileContents.toString())
             : _.fromPairs(await readXlsxFile(fileContents));
 
         return _sanitizedParsedValues(parsedValues);
     } catch (error) {
-        WindowUtils.error(error);
+        await WindowUtils.error(error);
     }
 };
 
