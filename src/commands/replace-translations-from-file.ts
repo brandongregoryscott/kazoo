@@ -37,10 +37,7 @@ const replaceTranslationsFromFile = async (
             return;
         }
 
-        const translations = await _getTranslationsFromJsonFile(
-            cultureFile.getFilePath(),
-            inputFilePath
-        );
+        const translations = await _getTranslationsFromFile(inputFilePath);
         if (translations == null) {
             return;
         }
@@ -57,7 +54,10 @@ const replaceTranslationsFromFile = async (
 
         const { notFound } = updateResult;
         if (notFound.length > 0) {
-            return await WindowUtils.warning(_getExtraKeysWarning(notFound));
+            log.warn(`Keys not found: ${notFound.join()}`);
+            return await WindowUtils.warning(
+                `Found ${notFound.length} keys in JSON file that are not in the source`
+            );
         }
 
         return await WindowUtils.info(CULTURE_FILE_UPDATED);
@@ -106,27 +106,13 @@ const _getCultureFileToUpdate = async (
     return cultureFile;
 };
 
-const _getExtraKeysWarning = (notFoundProperties: string[]): string => {
-    const { length: count } = notFoundProperties;
-    const keys = notFoundProperties.join(", ");
-
-    const warning = `Found ${count} keys in JSON file that are not in the source`;
-
-    // Outputting over 5 keys could get messy with a toast.
-    if (notFoundProperties.length > 5) {
-        return warning;
-    }
-
-    return `${warning}:\n${keys}`;
-};
-
-const _getTranslationsFromJsonFile = async (
-    cultureFilePath: string,
+const _getTranslationsFromFile = async (
     inputFilePath?: string
 ): Promise<Record<string, string> | undefined> => {
     const inputFiles = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
     if (inputFiles.length < 1) {
         await WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
+        return;
     }
 
     if (inputFilePath == null) {
