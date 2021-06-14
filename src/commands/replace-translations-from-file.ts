@@ -7,14 +7,17 @@ import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import _ from "lodash";
 import { CoreUtils } from "../utilities/core-utils";
+import readXlsxFile from "read-excel-file";
+import { StringUtils } from "../utilities/string-utils";
+import { log } from "../utilities/log";
+import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
 const CULTURE_FILE_UPDATED = "Successfully updated culture file!";
-const ERROR_FILE_MUST_BE_JSON =
-    "The file path or pattern provided must end with a .json extension.";
+const ERROR_NO_SUPPORTED_FILES_FOUND = "No .xlsx or .json files were found.";
 const ERROR_UPDATING_CULTURE_FILE =
     "There was an error updating the culture file.";
 
@@ -24,9 +27,9 @@ const ERROR_UPDATING_CULTURE_FILE =
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const replaceTranslationsFromJson = async (
+const replaceTranslationsFromFile = async (
     cultureFilePath?: string,
-    jsonFilePath?: string
+    inputFilePath?: string
 ) => {
     try {
         const cultureFile = await _getCultureFileToUpdate(cultureFilePath);
@@ -34,10 +37,7 @@ const replaceTranslationsFromJson = async (
             return;
         }
 
-        const translations = await _getTranslationsFromJsonFile(
-            cultureFile.getFilePath(),
-            jsonFilePath
-        );
+        const translations = await _getTranslationsFromFile(inputFilePath);
         if (translations == null) {
             return;
         }
@@ -50,16 +50,19 @@ const replaceTranslationsFromJson = async (
             return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
         }
 
-        const { notFoundProperties } = updateResult;
-        if (notFoundProperties.length > 0) {
+        log.info(_formatUpdateResult(updateResult));
+
+        const { notFound } = updateResult;
+        if (notFound.length > 0) {
+            log.warn(`Keys not found: ${notFound.join()}`);
             return await WindowUtils.warning(
-                _getExtraKeysWarning(notFoundProperties)
+                `Found ${notFound.length} keys in JSON file that are not in the source`
             );
         }
 
         return await WindowUtils.info(CULTURE_FILE_UPDATED);
     } catch (error) {
-        return await CoreUtils.catch(replaceTranslationsFromJson, error);
+        return await CoreUtils.catch(replaceTranslationsFromFile, error);
     }
 };
 
@@ -68,6 +71,9 @@ const replaceTranslationsFromJson = async (
 // -----------------------------------------------------------------------------------------
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
+
+const _formatUpdateResult = (result: UpdatePropertiesResult): string =>
+    `Updated: ${result.updated.length} Unmodified: ${result.unmodified.length} Not found: ${result.notFound.length}`;
 
 const _getCultureFileToUpdate = async (
     cultureFilePath?: string
@@ -79,73 +85,69 @@ const _getCultureFileToUpdate = async (
         cultureFilePath = await WindowUtils.selection(cultureFilePaths);
     }
 
+    if (cultureFilePath == null) {
+        log.debug("No cultureFilePath entered - not continuing.");
+        return;
+    }
+
     const cultureFile = cultureFiles.find(
         (file) => file.getFilePath() === cultureFilePath
     );
 
-    if (cultureFilePath == null || cultureFile == null) {
+    if (cultureFile == null) {
+        log.warn(
+            "cultureFile was unexpectedly null",
+            cultureFilePath,
+            cultureFile
+        );
         return;
     }
 
     return cultureFile;
 };
 
-const _getExtraKeysWarning = (notFoundProperties: string[]): string => {
-    const { length: count } = notFoundProperties;
-    const keys = notFoundProperties.join(", ");
-
-    const warning = `Found ${count} keys in JSON file that are not in the source`;
-
-    // Outputting over 5 keys could get messy with a toast.
-    if (notFoundProperties.length > 5) {
-        return warning;
-    }
-
-    return `${warning}:\n${keys}`;
-};
-
-const _getTranslationsFromJsonFile = async (
-    cultureFilePath: string,
-    jsonFilePath?: string
+const _getTranslationsFromFile = async (
+    inputFilePath?: string
 ): Promise<Record<string, string> | undefined> => {
-    if (jsonFilePath == null) {
-        jsonFilePath = await WindowUtils.prompt(
-            `Enter a path/glob pattern to the JSON file to merge into ${cultureFilePath}`
-        );
-    }
-
-    if (jsonFilePath == null) {
+    const inputFiles = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
+    if (inputFiles.length < 1) {
+        await WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
         return;
     }
 
-    if (!jsonFilePath.endsWith(".json")) {
-        await WindowUtils.error(ERROR_FILE_MUST_BE_JSON);
+    if (inputFilePath == null) {
+        inputFilePath = await WindowUtils.selection(inputFiles);
+    }
+
+    if (inputFilePath == null) {
+        log.debug("No inputFilePath entered - not continuing.");
         return;
     }
 
-    return _parseJsonFile(jsonFilePath);
+    return _parseFile(inputFilePath);
 };
 
-const _parseJsonFile = async (
-    pathOrPattern: string
+const _parseFile = async (
+    filePath: string
 ): Promise<Record<string, string> | undefined> => {
     try {
-        const path = await FileUtils.findFirst(pathOrPattern);
-        const fileContents = fs.readFileSync(path!);
-        const parsedObject: Record<string, string> = JSON.parse(
-            fileContents.toString()
-        );
+        const fileContents = fs.readFileSync(filePath);
+        const parsedValues: Record<string, string> = StringUtils.isJsonFile(
+            filePath
+        )
+            ? JSON.parse(fileContents.toString())
+            : _.fromPairs(await readXlsxFile(fileContents));
 
-        return _sanitizeParsedJson(parsedObject);
+        return _sanitizedParsedValues(parsedValues);
     } catch (error) {
-        WindowUtils.error(error);
+        await WindowUtils.error(error);
     }
 };
 
 const _replaceTranslations = async (
     translations: Record<string, string>,
     file: SourceFile
-) => {
+): Promise<UpdatePropertiesResult | undefined> => {
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
         await WindowUtils.errorResourcesNotFound(file);
@@ -168,7 +170,7 @@ const _replaceTranslations = async (
     return updateResult;
 };
 
-const _sanitizeParsedJson = (
+const _sanitizedParsedValues = (
     object: Record<string, string>
 ): Record<string, string> => {
     const clonedObject = Object.assign({}, object);
@@ -189,6 +191,6 @@ const _sanitizeParsedJson = (
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { replaceTranslationsFromJson };
+export { replaceTranslationsFromFile };
 
 // #endregion Exports

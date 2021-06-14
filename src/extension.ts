@@ -5,7 +5,7 @@ import { ProjectUtils } from "./utilities/project-utils";
 import { addKeyToInterface } from "./commands/add-key-to-interface";
 import { addKeyAndTranslation } from "./commands/add-key-and-translation";
 import { addTranslationToCultureFiles } from "./commands/add-translation-to-culture-files";
-import { replaceTranslationsFromJson } from "./commands/replace-translations-from-json";
+import { replaceTranslationsFromFile } from "./commands/replace-translations-from-file";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -34,7 +34,7 @@ export {
     addKeyToInterface,
     addTranslationToCultureFiles,
     deactivate,
-    replaceTranslationsFromJson,
+    replaceTranslationsFromFile,
 };
 
 // #endregion Exports

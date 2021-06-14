@@ -3,7 +3,7 @@
         "onCommand:kazoo.addKeyAndTranslation",
         "onCommand:kazoo.addKeyToInterface",
         "onCommand:kazoo.addTranslationToCultureFiles",
-        "onCommand:kazoo.replaceTranslationsFromJson"
+        "onCommand:kazoo.replaceTranslationsFromFile"
     ],
     "author": {
         "name": "Brandon Scott",
@@ -31,8 +31,8 @@
             },
             {
                 "category": "kazoo",
-                "command": "kazoo.replaceTranslationsFromJson",
-                "title": "Replace translations from json file"
+                "command": "kazoo.replaceTranslationsFromFile",
+                "title": "Replace translations from json/xlsx file"
             }
         ],
         "configuration": {
@@ -76,6 +76,7 @@
         "anylogger-log4js": "0.2.0",
         "lodash": "4.17.21",
         "log4js": "6.3.0",
+        "read-excel-file": "5.1.0",
         "ts-morph": "10.0.1"
     },
     "description": "Ease the burden of adding localized keys and strings to multiple typed culture files",
