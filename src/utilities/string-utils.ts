@@ -7,9 +7,6 @@ import { NodeUtils } from "./node-utils";
 // -----------------------------------------------------------------------------------------
 
 const StringUtils = {
-    isExcelFile(fileName: string): boolean {
-        return fileName.endsWith(".xlsx");
-    },
     isJsonFile(fileName: string): boolean {
         return fileName.endsWith(".json");
     },
