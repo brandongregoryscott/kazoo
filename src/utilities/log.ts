@@ -22,7 +22,7 @@ const fileAppender: FileAppender = {
 
 const fileLogLevelFilterAppender: LogLevelFilterAppender = {
     appender: "file",
-    level: "error",
+    level: "warn",
     type: "logLevelFilter",
 };
 
