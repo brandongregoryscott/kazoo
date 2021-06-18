@@ -15,30 +15,30 @@ const { RESOURCES } = SharedConstants;
 // -----------------------------------------------------------------------------------------
 
 const WindowUtils = {
-    error(value: string) {
-        return vscode.window.showErrorMessage(value);
+    error(value: string): void {
+        vscode.window.showErrorMessage(value);
     },
-    errorResourcesNotFound(file: SourceFile) {
+    errorResourcesNotFound(file: SourceFile): void {
         const fileName = file.getBaseName();
         const message = `Expected to find object literal with key '${RESOURCES}' in ${fileName}.`;
-        return this.error(message);
+        this.error(message);
     },
-    info(value: string) {
-        return vscode.window.showInformationMessage(value);
+    info(value: string): void {
+        vscode.window.showInformationMessage(value);
     },
-    prompt(prompt: string) {
+    prompt(prompt: string): Thenable<string | undefined> {
         return vscode.window.showInputBox({
             prompt,
             ignoreFocusOut: true,
         });
     },
-    selection(options: string[]) {
+    selection(options: string[]): Thenable<string | undefined> {
         return vscode.window.showQuickPick(options, {
             ignoreFocusOut: true,
         });
     },
-    warning(value: string) {
-        return vscode.window.showWarningMessage(value);
+    warning(value: string): void {
+        vscode.window.showWarningMessage(value);
     },
 };
 

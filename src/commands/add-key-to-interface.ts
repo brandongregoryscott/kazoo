@@ -8,6 +8,8 @@ import { StringUtils } from "../utilities/string-utils";
 import { Property } from "../types/property";
 import { InsertionPosition } from "../enums/insertion-position";
 import { CoreUtils } from "../utilities/core-utils";
+import { log } from "../utilities/log";
+import { Commands } from "../constants/commands";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -25,13 +27,16 @@ const addKeyToInterface = async (key?: string) => {
         }
 
         if (key == null) {
+            log.debug(
+                `Key was not entered from prompt in ${Commands.addKeyToInterface}`
+            );
             return;
         }
 
         const properties = cultureInterface.getProperties();
         const existingProperty = NodeUtils.findPropertyByName(key, properties);
         if (existingProperty != null) {
-            await WindowUtils.error(
+            WindowUtils.error(
                 `Error - key '${key}' already exists in ${_fileAndLineNumber(
                     cultureInterface,
                     existingProperty
@@ -61,7 +66,7 @@ const addKeyToInterface = async (key?: string) => {
             cultureInterface.getProperties()
         )!;
 
-        await WindowUtils.info(
+        WindowUtils.info(
             `Key '${key}' successfully added to ${_fileAndLineNumber(
                 cultureInterface,
                 newProperty
@@ -70,7 +75,7 @@ const addKeyToInterface = async (key?: string) => {
 
         return key;
     } catch (error) {
-        return await CoreUtils.catch(addKeyToInterface, error);
+        CoreUtils.catch("addKeyToInterface", error);
     }
 };
 

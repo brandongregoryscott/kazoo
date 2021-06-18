@@ -1,4 +1,6 @@
+import { Commands } from "../constants/commands";
 import { CoreUtils } from "../utilities/core-utils";
+import { log } from "../utilities/log";
 import { addKeyToInterface } from "./add-key-to-interface";
 import { addTranslationToCultureFiles } from "./add-translation-to-culture-files";
 
@@ -10,12 +12,15 @@ const addKeyAndTranslation = async (key?: string, translation?: string) => {
     try {
         key = await addKeyToInterface(key);
         if (key == null) {
+            log.debug(
+                `Key from ${Commands.addKeyToInterface} returned: ${key}`
+            );
             return;
         }
 
         return await addTranslationToCultureFiles(key, translation);
     } catch (error) {
-        return await CoreUtils.catch(addKeyAndTranslation, error);
+        CoreUtils.catch("addKeyAndTranslation", error);
     }
 };
 
