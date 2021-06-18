@@ -11,12 +11,14 @@ import { WorkspaceUtils } from "./workspace-utils";
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
+const logPath: string = `${WorkspaceUtils.getFolder()}/kazoo_log.txt`;
+
 const consoleAppender: ConsoleAppender = {
     type: "console",
 };
 
 const fileAppender: FileAppender = {
-    filename: `${WorkspaceUtils.getFolder()}/kazoo_log.txt`,
+    filename: logPath,
     type: "file",
 };
 
@@ -50,6 +52,6 @@ const log = anylogger("kazoo");
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { log };
+export { log, logPath };
 
 // #endregion Exports

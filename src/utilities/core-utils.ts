@@ -1,6 +1,7 @@
 import { Commands } from "../constants/commands";
-import { log } from "./log";
+import { log, logPath } from "./log";
 import { WindowUtils } from "./window-utils";
+import * as vscode from "vscode";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -9,8 +10,10 @@ import { WindowUtils } from "./window-utils";
 const CoreUtils = {
     catch(functionName: keyof typeof Commands, error: any): undefined {
         log.error(`[${functionName}]:`, error);
+
         WindowUtils.error(
-            "An error occurred running command, see log file for more detail."
+            "An error occurred running command, see log file for more detail.",
+            { value: "View log", onSelection: openLogFile }
         );
 
         return undefined;
@@ -18,6 +21,18 @@ const CoreUtils = {
 };
 
 // #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const openLogFile = async () =>
+    await vscode.commands.executeCommand(
+        "vscode.open",
+        vscode.Uri.file(logPath)
+    );
+
+// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
