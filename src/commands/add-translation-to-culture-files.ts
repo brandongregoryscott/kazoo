@@ -53,8 +53,12 @@ const addTranslationToCultureFiles = async (
         );
 
         await Promise.all(transformations);
+
+        WindowUtils.info(
+            `Successfully updated ${transformations.length} culture files!`
+        );
     } catch (error) {
-        return await CoreUtils.catch(addTranslationToCultureFiles, error);
+        CoreUtils.catch("addTranslationToCultureFiles", error);
     }
 };
 
@@ -72,7 +76,7 @@ const _addTranslationToFile = async (
     const baseLanguage = SourceFileUtils.getBaseLanguage(file);
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        await WindowUtils.errorResourcesNotFound(file);
+        WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
@@ -132,7 +136,7 @@ const _buildNewProperty = async (
             initializer: StringUtils.quoteEscape(translationResult.text),
         };
     } catch (error) {
-        await WindowUtils.error(
+        WindowUtils.error(
             `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`
         );
     }

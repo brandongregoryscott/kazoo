@@ -47,7 +47,8 @@ const replaceTranslationsFromFile = async (
             cultureFile
         );
         if (updateResult == null) {
-            return await WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
+            WindowUtils.error(ERROR_UPDATING_CULTURE_FILE);
+            return;
         }
 
         log.info(_formatUpdateResult(updateResult));
@@ -60,9 +61,9 @@ const replaceTranslationsFromFile = async (
             );
         }
 
-        return await WindowUtils.info(CULTURE_FILE_UPDATED);
+        WindowUtils.info(CULTURE_FILE_UPDATED);
     } catch (error) {
-        return await CoreUtils.catch(replaceTranslationsFromFile, error);
+        CoreUtils.catch("replaceTranslationsFromFile", error);
     }
 };
 
@@ -111,7 +112,7 @@ const _getTranslationsFromFile = async (
 ): Promise<Record<string, string> | undefined> => {
     const inputFiles = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
     if (inputFiles.length < 1) {
-        await WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
+        WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
         return;
     }
 
@@ -140,7 +141,7 @@ const _parseFile = async (
 
         return _sanitizedParsedValues(parsedValues);
     } catch (error) {
-        await WindowUtils.error(error);
+        WindowUtils.error(error);
     }
 };
 
@@ -150,7 +151,7 @@ const _replaceTranslations = async (
 ): Promise<UpdatePropertiesResult | undefined> => {
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        await WindowUtils.errorResourcesNotFound(file);
+        WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
