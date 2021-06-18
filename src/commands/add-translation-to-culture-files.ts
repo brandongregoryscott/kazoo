@@ -53,6 +53,10 @@ const addTranslationToCultureFiles = async (
         );
 
         await Promise.all(transformations);
+
+        WindowUtils.info(
+            `Successfully updated ${transformations.length} culture files!`
+        );
     } catch (error) {
         CoreUtils.catch("addTranslationToCultureFiles", error);
     }
