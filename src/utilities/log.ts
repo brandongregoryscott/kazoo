@@ -11,7 +11,7 @@ import { WorkspaceUtils } from "./workspace-utils";
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
-const logPath: string = `${WorkspaceUtils.getFolder()}/kazoo_log.txt`;
+const logPath: string = `${WorkspaceUtils.getFolder()}/kazoo.log`;
 
 const consoleAppender: ConsoleAppender = {
     type: "console",
