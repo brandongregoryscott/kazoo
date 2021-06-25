@@ -2,7 +2,8 @@
     "activationEvents": [
         "onCommand:kazoo.addKeyAndTranslation",
         "onCommand:kazoo.addKeyToInterface",
-        "onCommand:kazoo.addTranslationToCultureFiles"
+        "onCommand:kazoo.addTranslationToCultureFiles",
+        "onCommand:kazoo.replaceTranslationsFromFile"
     ],
     "author": {
         "name": "Brandon Scott",
@@ -27,6 +28,11 @@
                 "category": "kazoo",
                 "command": "kazoo.addTranslationToCultureFiles",
                 "title": "Add translation to culture files"
+            },
+            {
+                "category": "kazoo",
+                "command": "kazoo.replaceTranslationsFromFile",
+                "title": "Replace translations from json/xlsx file"
             }
         ],
         "configuration": {
@@ -66,17 +72,24 @@
     },
     "dependencies": {
         "@vitalets/google-translate-api": "5.1.0",
+        "anylogger": "1.0.11",
+        "anylogger-log4js": "0.2.0",
+        "lodash": "4.17.21",
+        "log4js": "6.3.0",
+        "read-excel-file": "5.1.0",
         "ts-morph": "10.0.1"
     },
     "description": "Ease the burden of adding localized keys and strings to multiple typed culture files",
     "devDependencies": {
         "@types/faker": "5.5.3",
         "@types/glob": "7.1.3",
+        "@types/lodash": "4.14.168",
         "@types/mocha": "8.0.4",
         "@types/shelljs": "0.8.8",
         "@types/vscode": "1.54.0",
         "@typescript-eslint/eslint-plugin": "4.14.1",
         "@typescript-eslint/parser": "4.14.1",
+        "esbuild": "0.11.20",
         "eslint": "7.19.0",
         "faker": "5.5.3",
         "glob": "7.1.6",
@@ -85,13 +98,14 @@
         "rimraf": "3.0.2",
         "shelljs": "^0.8.4",
         "typescript": "4.1.3",
-        "upath": "^2.0.1",
+        "upath": "2.0.1",
         "vscode-test": "1.5.0"
     },
     "displayName": "kazoo",
     "engines": {
         "vscode": "^1.54.0"
     },
+    "icon": "assets/icon.png",
     "keywords": [
         "i18n",
         "l10n",
@@ -109,15 +123,19 @@
         "url": "https://github.com/brandongregoryscott/kazoo.git"
     },
     "scripts": {
-        "build": "tsc --pretty --project tsconfig.json",
+        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
+        "build": "npm run esbuild -- --sourcemap",
+        "build:dist": "npm run esbuild -- --minify",
         "clean": "rimraf dist **/tmp/*",
         "lint": "eslint src --ext ts",
-        "postpublish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
+        "postvscode:publish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
         "pretest": "npm run build && npm run lint",
+        "prevscode:publish": "npm run build:dist",
         "test": "node ./dist/test/runTest.js",
-        "vscode:prepublish": "npm run build",
-        "watch": "tsc --pretty --watch --project tsconfig.json"
+        "vscode:pack": "vsce package",
+        "vscode:publish": "npm run vscode:pack && vsce publish",
+        "watch": "npm run esbuild -- --sourcemap --watch"
     },
-    "version": "0.0.1"
+    "version": "0.2.2"
 }

@@ -1,9 +1,11 @@
+import "anylogger-log4js";
 import * as vscode from "vscode";
 import { CommandMap } from "./constants/command-map";
 import { ProjectUtils } from "./utilities/project-utils";
 import { addKeyToInterface } from "./commands/add-key-to-interface";
 import { addKeyAndTranslation } from "./commands/add-key-and-translation";
 import { addTranslationToCultureFiles } from "./commands/add-translation-to-culture-files";
+import { replaceTranslationsFromFile } from "./commands/replace-translations-from-file";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -32,6 +34,7 @@ export {
     addKeyToInterface,
     addTranslationToCultureFiles,
     deactivate,
+    replaceTranslationsFromFile,
 };
 
 // #endregion Exports

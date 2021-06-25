@@ -3,12 +3,16 @@ import {
     InterfaceDeclaration,
     Node,
     ObjectLiteralExpression,
+    OptionalKind,
     PropertyAssignment,
     PropertyAssignmentStructure,
     PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
 import { Property } from "../types/property";
+import * as _ from "lodash";
+import { StringUtils } from "./string-utils";
+import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -46,7 +50,7 @@ const findIndex = (
     return names.indexOf(name);
 };
 
-const findInitializer = (nodes?: Node[]): Identifier | undefined =>
+const findIdentifier = (nodes?: Node[]): Identifier | undefined =>
     nodes?.find((node) => Node.isIdentifier(node)) as Identifier | undefined;
 
 const findObjectLiteralExpressionWithProperty = (
@@ -71,6 +75,74 @@ const isObjectLiteralExpressionWithProperty = (
     property: string
 ): node is ObjectLiteralExpression =>
     Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
+
+const mapToPropertyAssignments = (
+    object: Record<string, string>,
+    existingProperties: Property[]
+): Array<OptionalKind<PropertyAssignmentStructure>> =>
+    Object.entries(object).map(([key, value]) => ({
+        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+        initializer: StringUtils.quoteEscape(value),
+    }));
+
+const updateProperties = (
+    existing: Property[],
+    updated: Array<OptionalKind<PropertyAssignmentStructure>>
+): UpdatePropertiesResult => {
+    const diffByInitializer = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) => existing.getInitializer()?.getText() !== updated.initializer;
+
+    const compareByName = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) => existing.getName() === updated.name;
+
+    const diffByNameAndInitializer = (
+        existing: Property,
+        updated: OptionalKind<PropertyAssignmentStructure>
+    ) =>
+        compareByName(existing, updated) &&
+        diffByInitializer(existing, updated);
+
+    const propertiesToUpdate = _.intersectionWith(
+        existing,
+        updated,
+        diffByNameAndInitializer
+    );
+
+    const unmodifiedProperties = _.differenceWith(
+        existing,
+        updated,
+        diffByNameAndInitializer
+    );
+
+    const notFoundProperties = _.differenceWith(
+        updated,
+        existing,
+        (updated, existing) => compareByName(existing, updated)
+    );
+
+    const updateProperty = (existingProperty: Property) => {
+        const updatedProperty = updated.find((updatedProperty) =>
+            compareByName(existingProperty, updatedProperty)
+        );
+        if (updatedProperty == null) {
+            return;
+        }
+
+        existingProperty.setInitializer(updatedProperty.initializer);
+    };
+
+    propertiesToUpdate.forEach(updateProperty);
+
+    return {
+        notFound: notFoundProperties.map((property) => property.name),
+        unmodified: unmodifiedProperties.map((property) => property.getName()),
+        updated: propertiesToUpdate.map((property) => property.getName()),
+    };
+};
 
 const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
@@ -146,15 +218,17 @@ const _trimPropertyName = (property: Property) =>
 
 export const NodeUtils = {
     findIndex,
-    findInitializer,
+    findIdentifier,
     findObjectLiteralExpressionWithProperty,
     findPropertyByName,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,
+    mapToPropertyAssignments,
     shouldQuoteEscapeNewProperty,
     sortPropertiesByName,
     sortPropertyAssignments,
     sortPropertySignatures,
+    updateProperties,
 };
 
 // #endregion Exports

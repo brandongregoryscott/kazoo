@@ -7,66 +7,76 @@ import { ConfigUtils } from "../utilities/config-utils";
 import { StringUtils } from "../utilities/string-utils";
 import { Property } from "../types/property";
 import { InsertionPosition } from "../enums/insertion-position";
+import { CoreUtils } from "../utilities/core-utils";
+import { log } from "../utilities/log";
+import { Commands } from "../constants/commands";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
 const addKeyToInterface = async (key?: string) => {
-    const cultureInterfaceFile = await ProjectUtils.getCultureInterfaceFile();
-    const cultureInterface = await ProjectUtils.getCultureInterface();
+    try {
+        const cultureInterfaceFile = await ProjectUtils.getCultureInterfaceFile();
+        const cultureInterface = await ProjectUtils.getCultureInterface();
 
-    if (key == null) {
-        key = await vscode.window.showInputBox({
-            prompt: `Enter a key to insert into ${cultureInterface.getName()}`,
+        if (key == null) {
+            key = await WindowUtils.prompt(
+                `Enter a key to insert into ${cultureInterface.getName()}`
+            );
+        }
+
+        if (key == null) {
+            log.debug(
+                `Key was not entered from prompt in ${Commands.addKeyToInterface}`
+            );
+            return;
+        }
+
+        const properties = cultureInterface.getProperties();
+        const existingProperty = NodeUtils.findPropertyByName(key, properties);
+        if (existingProperty != null) {
+            WindowUtils.error(
+                `Error - key '${key}' already exists in ${_fileAndLineNumber(
+                    cultureInterface,
+                    existingProperty
+                )}`
+            );
+            return;
+        }
+
+        const { insertionPosition } = ConfigUtils.get();
+        const index = NodeUtils.findIndex(insertionPosition, key, properties);
+
+        let newProperty: Property = cultureInterface.insertProperty(index, {
+            name: StringUtils.quoteEscapeIfNeeded(key, properties),
+            type: "string",
         });
-    }
 
-    if (key == null) {
-        return;
-    }
+        // Only do a full sort/replace if strictly alphabetizing
+        if (insertionPosition === InsertionPosition.StrictAlphabetical) {
+            NodeUtils.sortPropertySignatures(cultureInterface);
+        }
 
-    const properties = cultureInterface.getProperties();
-    const existingProperty = NodeUtils.findPropertyByName(key, properties);
-    if (existingProperty != null) {
-        WindowUtils.error(
-            `Error - key '${key}' already exists in ${_fileAndLineNumber(
+        await cultureInterfaceFile.save();
+
+        // Refresh property as original might have been removed if strictly alphabetizing
+        newProperty = NodeUtils.findPropertyByName(
+            key,
+            cultureInterface.getProperties()
+        )!;
+
+        WindowUtils.info(
+            `Key '${key}' successfully added to ${_fileAndLineNumber(
                 cultureInterface,
-                existingProperty
+                newProperty
             )}`
         );
-        return;
+
+        return key;
+    } catch (error) {
+        CoreUtils.catch("addKeyToInterface", error);
     }
-
-    const { insertionPosition } = ConfigUtils.get();
-    const index = NodeUtils.findIndex(insertionPosition, key, properties);
-
-    let newProperty: Property = cultureInterface.insertProperty(index, {
-        name: StringUtils.quoteEscapeIfNeeded(key, properties),
-        type: "string",
-    });
-
-    // Only do a full sort/replace if strictly alphabetizing
-    if (insertionPosition === InsertionPosition.StrictAlphabetical) {
-        NodeUtils.sortPropertySignatures(cultureInterface);
-    }
-
-    await cultureInterfaceFile.save();
-
-    // Refresh property as original might have been removed if strictly alphabetizing
-    newProperty = NodeUtils.findPropertyByName(
-        key,
-        cultureInterface.getProperties()
-    )!;
-
-    WindowUtils.info(
-        `Key '${key}' successfully added to ${_fileAndLineNumber(
-            cultureInterface,
-            newProperty
-        )}`
-    );
-
-    return key;
 };
 
 // #endregion Public Functions

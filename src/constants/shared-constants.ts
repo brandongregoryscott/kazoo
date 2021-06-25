@@ -2,11 +2,8 @@
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
-const Commands = {
-    addKeyToInterface: "kazoo.addKeyToInterface",
-    addKeyAndTranslation: "kazoo.addKeyAndTranslation",
-    addTranslationToCultureFiles: "kazoo.addTranslationToCultureFiles",
-    replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
+const SharedConstants = {
+    RESOURCES: "resources",
 };
 
 // #endregion Constants
@@ -15,6 +12,6 @@ const Commands = {
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { Commands };
+export { SharedConstants };
 
 // #endregion Exports

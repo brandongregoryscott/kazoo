@@ -1,7 +1,13 @@
-# kazoo
-
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
+<p align="center">
+    <img src="https://raw.githubusercontent.com/brandongregoryscott/kazoo/main/assets/banner.png" width="50%" height="50%"/>
+    <br/>
+    <a href="https://github.com/prettier/prettier">
+        <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square"/>
+    </a>
+    <a href="http://www.typescriptlang.org/">
+        <img alt="TypeScript" src="https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg"/>
+    </a>
+</p>
 
 VS Code extension to ease the burden of adding localized keys and strings to multiple typed culture files
 
@@ -23,6 +29,12 @@ VS Code extension to ease the burden of adding localized keys and strings to mul
     -   Prompts the user for a key and translation to add to each file specified in the extension settings.
 
 ![Add translation to culture files](examples/add-translation-to-culture-files.gif)
+
+-   Replace translations from JSON
+
+    -   Prompts the user to select a culture file to update with values from a JSON object in the same structure.
+
+![Replace translations from JSON](examples/replace-translations-from-json.gif)
 
 ## Requirements
 

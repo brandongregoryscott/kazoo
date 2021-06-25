@@ -1,9 +1,6 @@
-import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { SyntaxKind } from "@ts-morph/common";
 import {
     Identifier,
-    Node,
     OptionalKind,
     PropertyAssignmentStructure,
     SourceFile,
@@ -13,17 +10,11 @@ import { StringUtils } from "../utilities/string-utils";
 import { ConfigUtils } from "../utilities/config-utils";
 import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
-import * as translate from "@vitalets/google-translate-api";
+import translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
-
-// -----------------------------------------------------------------------------------------
-// #region Constants
-// -----------------------------------------------------------------------------------------
-
-const RESOURCES = "resources";
-
-// #endregion Constants
+import { SourceFileUtils } from "../utilities/source-file-utils";
+import { CoreUtils } from "../utilities/core-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -33,34 +24,42 @@ const addTranslationToCultureFiles = async (
     key?: string,
     translation?: string
 ) => {
-    const cultureInterface = await ProjectUtils.getCultureInterface();
-    const cultureFiles = await ProjectUtils.getCultureFiles();
+    try {
+        const cultureInterface = await ProjectUtils.getCultureInterface();
+        const cultureFiles = await ProjectUtils.getCultureFiles();
 
-    if (key == null) {
-        key = await vscode.window.showInputBox({
-            prompt: `Enter a key from ${cultureInterface.getName()} to insert into the culture files`,
-        });
+        if (key == null) {
+            key = await WindowUtils.prompt(
+                `Enter a key from ${cultureInterface.getName()} to insert into the culture files`
+            );
+        }
+
+        if (key == null) {
+            return;
+        }
+
+        if (translation == null) {
+            translation = await WindowUtils.prompt(
+                `Enter the English copy for key '${key}'`
+            );
+        }
+
+        if (translation == null) {
+            return;
+        }
+
+        const transformations = cultureFiles.map((file) =>
+            _addTranslationToFile(file, key!, translation!)
+        );
+
+        await Promise.all(transformations);
+
+        WindowUtils.info(
+            `Successfully updated ${transformations.length} culture files!`
+        );
+    } catch (error) {
+        CoreUtils.catch("addTranslationToCultureFiles", error);
     }
-
-    if (key == null) {
-        return;
-    }
-
-    if (translation == null) {
-        translation = await vscode.window.showInputBox({
-            prompt: `Enter the English copy for key '${key}'`,
-        });
-    }
-
-    if (translation == null) {
-        return;
-    }
-
-    const transformations = cultureFiles.map((file) =>
-        _addTranslationToFile(file, key!, translation!)
-    );
-
-    await Promise.all(transformations);
 };
 
 // #endregion Public Functions
@@ -74,31 +73,10 @@ const _addTranslationToFile = async (
     key: string,
     value: string
 ) => {
-    // Get the first variable exported - we should be able to assume that the exported value is the culture resource
-    const cultureResource = file.getVariableDeclaration((variable) =>
-        variable.isExported()
-    );
-    const initializerArgs =
-        cultureResource
-            ?.getInitializerIfKind(SyntaxKind.CallExpression)
-            ?.getArguments() ?? [];
-    const baseLanguage = NodeUtils.findInitializer(initializerArgs);
-    const resourceInitializer = NodeUtils.findObjectLiteralExpressionWithProperty(
-        initializerArgs,
-        RESOURCES
-    );
-
-    if (resourceInitializer == null) {
-        _errorResourcesNotFound(file);
-        return;
-    }
-
-    const resourceObject = resourceInitializer
-        .getProperty(RESOURCES)
-        ?.getLastChildByKind(SyntaxKind.ObjectLiteralExpression);
-
+    const baseLanguage = SourceFileUtils.getBaseLanguage(file);
+    const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
-        _errorResourcesNotFound(file);
+        WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
@@ -138,7 +116,7 @@ const _buildNewProperty = async (
         baseLanguage?.getText()
     );
 
-    let property: OptionalKind<PropertyAssignmentStructure> = {
+    const property: OptionalKind<PropertyAssignmentStructure> = {
         name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
         initializer: StringUtils.quoteEscape(value),
     };
@@ -165,11 +143,6 @@ const _buildNewProperty = async (
 
     return property;
 };
-
-const _errorResourcesNotFound = (file: SourceFile) =>
-    WindowUtils.error(
-        `Expected to find object literal with key '${RESOURCES}' in ${file.getBaseName()}.`
-    );
 
 // #endregion Private Functions
 

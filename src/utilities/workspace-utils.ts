@@ -1,20 +1,21 @@
+import * as vscode from "vscode";
+
 // -----------------------------------------------------------------------------------------
-// #region Constants
+// #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const Commands = {
-    addKeyToInterface: "kazoo.addKeyToInterface",
-    addKeyAndTranslation: "kazoo.addKeyAndTranslation",
-    addTranslationToCultureFiles: "kazoo.addTranslationToCultureFiles",
-    replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
+const WorkspaceUtils = {
+    getFolder(): string | undefined {
+        return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    },
 };
 
-// #endregion Constants
+// #endregion Public Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { Commands };
+export { WorkspaceUtils };
 
 // #endregion Exports

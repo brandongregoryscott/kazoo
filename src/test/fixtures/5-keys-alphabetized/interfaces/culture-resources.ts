@@ -1,20 +1,21 @@
 // -----------------------------------------------------------------------------------------
-// #region Constants
+// #region Interfaces
 // -----------------------------------------------------------------------------------------
 
-const Commands = {
-    addKeyToInterface: "kazoo.addKeyToInterface",
-    addKeyAndTranslation: "kazoo.addKeyAndTranslation",
-    addTranslationToCultureFiles: "kazoo.addTranslationToCultureFiles",
-    replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
-};
+interface CultureResources {
+    accountInformation: string;
+    cancelMySubscription: string;
+    checkOutFaq: string;
+    subscriptionDetails: string;
+    teamManagement: string;
+}
 
-// #endregion Constants
+// #endregion Interfaces
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { Commands };
+export { CultureResources };
 
 // #endregion Exports
