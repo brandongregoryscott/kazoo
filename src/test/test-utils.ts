@@ -48,7 +48,7 @@ const TestUtils = {
         setShelljsFatal(false);
 
         // Configuration expects relative path
-        return appendTestDirectoryIfCI(tmpDirectory);
+        return prependTestDirectoryIfCI(tmpDirectory);
     },
     cleanTmpDirectory(): void {
         setShelljsFatal(true);
@@ -94,6 +94,9 @@ const TestUtils = {
 // -----------------------------------------------------------------------------------------
 
 const appendTestDirectoryIfCI = (path: string): string =>
+    TestUtils.isCI() ? upath.join(path, "src", "test") : path;
+
+const prependTestDirectoryIfCI = (path: string): string =>
     TestUtils.isCI() ? upath.join("src", "test", path) : path;
 
 const setShelljsFatal = (fatal: boolean) => (shell.config.fatal = fatal);
