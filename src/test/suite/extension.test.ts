@@ -1,9 +1,7 @@
-import * as assert from "assert";
-import * as vscode from "vscode";
-import { describe, afterEach, beforeEach } from "mocha";
+import assert from "assert";
+import vscode from "vscode";
+import { describe, beforeEach } from "mocha";
 import * as kazoo from "../../extension";
-import * as shell from "shelljs";
-import * as upath from "upath";
 import { TestFixtures, TestUtils } from "../test-utils";
 import { ProjectUtils } from "../../utilities/project-utils";
 

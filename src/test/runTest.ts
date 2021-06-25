@@ -25,11 +25,11 @@ async function main() {
         // Download VS Code, unzip it and run the integration test
         await runTests({
             extensionDevelopmentPath,
-            extensionTestsPath,
-            launchArgs,
             extensionTestsEnv: {
                 CI: ci.toString(),
             },
+            extensionTestsPath,
+            launchArgs,
         });
     } catch (err) {
         console.error("Failed to run tests");

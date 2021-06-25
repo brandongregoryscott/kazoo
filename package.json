@@ -125,7 +125,7 @@
     "scripts": {
         "build": "npm run esbuild -- --sourcemap",
         "build:dist": "npm run esbuild -- --minify",
-        "build:test": "tsc --pretty --project tsconfig.json",
+        "build:test": "tsc --pretty",
         "clean": "rimraf dist **/tmp/*",
         "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
         "lint": "eslint src --ext ts",
@@ -133,7 +133,7 @@
         "prebuild": "npm run clean",
         "prebuild:test": "npm run clean",
         "pretest": "npm run build:test && npm run lint",
-        "prevscode:publish": "npm run build:dist",
+        "prevscode:pack": "npm run build:dist",
         "test": "node ./dist/test/runTest.js --ci",
         "vscode:pack": "vsce package",
         "vscode:publish": "npm run vscode:pack && vsce publish",
