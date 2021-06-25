@@ -1,9 +1,10 @@
 import { ExtensionConfiguration } from "../interfaces/extension-configuration";
-import * as vscode from "vscode";
+import vscode from "vscode";
 import { ConfigUtils } from "../utilities/config-utils";
-import * as shell from "shelljs";
-import * as upath from "upath";
-import * as faker from "faker";
+import shell from "shelljs";
+import upath from "upath";
+import faker from "faker";
+import { WorkspaceUtils } from "../utilities/workspace-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -14,25 +15,43 @@ const { defaultConfig } = ConfigUtils;
 // #endregion Constants
 
 // -----------------------------------------------------------------------------------------
+// #region Enums
+// -----------------------------------------------------------------------------------------
+
+enum TestFixtures {
+    Empty = "empty",
+    FiveKeysAlphabetized = "5-keys-alphabetized",
+    SixHundredKeys = "600-keys",
+}
+
+// #endregion Enums
+
+// -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
 const TestUtils = {
-    copyFixturesToTmpDirectory(fixture: string): string {
-        shell.config.fatal = true;
+    copyFixturesToTmpDirectory(fixture: TestFixtures): string {
+        setShelljsFatal(true);
+
+        const workspace = WorkspaceUtils.getFolder();
         const tmpDirectory = upath.join("tmp", faker.datatype.uuid());
+        const absoluteTmpDirectory = upath.join(workspace, tmpDirectory);
+        const fixturesDirectory = upath.join(workspace, "fixtures", fixture);
 
-        shell.cp(
-            "-R",
-            upath.join(getWorkspaceFolder(), "fixtures", fixture, "*"),
-            tmpDirectory
-        );
+        // Ensure temporary directory exists
+        shell.mkdir("-p", absoluteTmpDirectory);
+        shell.cp("-R", fixturesDirectory, absoluteTmpDirectory);
 
+        setShelljsFatal(false);
+
+        // Configuration expects relative path
         return tmpDirectory;
     },
     cleanTmpDirectory(): void {
-        shell.config.fatal = true;
-        shell.rm("-rf", "tmp/*");
+        setShelljsFatal(true);
+        shell.rm("-rf", upath.join(WorkspaceUtils.getFolder(), "tmp", "*"));
+        setShelljsFatal(false);
     },
     getInterfacePath(tmpDirectory: string): string {
         return upath.join(tmpDirectory, "**", "interfaces", "*.ts");
@@ -51,9 +70,11 @@ const TestUtils = {
         const keys = Object.keys(updated) as Array<
             keyof ExtensionConfiguration
         >;
-        const configUpdates = keys.map((key: keyof ExtensionConfiguration) =>
-            config.update(key, updated[key])
-        );
+
+        const updateConfigByKey = (key: keyof ExtensionConfiguration) =>
+            config.update(key, updated[key]);
+
+        const configUpdates = keys.map(updateConfigByKey);
         return await Promise.all(configUpdates);
     },
     async resetConfig(): Promise<void[]> {
@@ -62,19 +83,12 @@ const TestUtils = {
 };
 // #endregion Public Functions
 
-// -----------------------------------------------------------------------------------------
-// #region Private Functions
-// -----------------------------------------------------------------------------------------
-
-const getWorkspaceFolder = () =>
-    upath.toUnix(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? "");
-
-// #endregion Private Functions
+const setShelljsFatal = (fatal: boolean) => (shell.config.fatal = fatal);
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { TestUtils };
+export { TestUtils, TestFixtures };
 
 // #endregion Exports

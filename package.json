@@ -96,7 +96,7 @@
         "mocha": "8.2.1",
         "prettier": "2.2.1",
         "rimraf": "3.0.2",
-        "shelljs": "^0.8.4",
+        "shelljs": "0.8.4",
         "typescript": "4.1.3",
         "upath": "2.0.1",
         "vscode-test": "1.5.0"
@@ -123,14 +123,16 @@
         "url": "https://github.com/brandongregoryscott/kazoo.git"
     },
     "scripts": {
-        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
         "build": "npm run esbuild -- --sourcemap",
         "build:dist": "npm run esbuild -- --minify",
+        "build:test": "tsc --pretty --project tsconfig.json",
         "clean": "rimraf dist **/tmp/*",
+        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
         "lint": "eslint src --ext ts",
         "postvscode:publish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
-        "pretest": "npm run build && npm run lint",
+        "prebuild:test": "npm run clean",
+        "pretest": "npm run build:test && npm run lint",
         "prevscode:publish": "npm run build:dist",
         "test": "node ./dist/test/runTest.js",
         "vscode:pack": "vsce package",

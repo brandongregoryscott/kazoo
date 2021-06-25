@@ -4,23 +4,13 @@ import { describe, afterEach, beforeEach } from "mocha";
 import * as kazoo from "../../extension";
 import * as shell from "shelljs";
 import * as upath from "upath";
-import { TestUtils } from "../test-utils";
+import { TestFixtures, TestUtils } from "../test-utils";
+import { ProjectUtils } from "../../utilities/project-utils";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
     // #region Setup
     // -----------------------------------------------------------------------------------------
-
-    // const cleanupFixtures = () => {
-    //     const workspaceDirectory =
-    //         vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    //     const fixturesDirectory = upath.join(workspaceDirectory, "fixtures");
-
-    //     // Manually set node execPath (see https://github.com/shelljs/shelljs/wiki/Electron-compatibility)
-    //     shell.config.execPath = shell.which("node").toString();
-    //     shell.cd(fixturesDirectory);
-    //     shell.exec("git checkout .");
-    // };
 
     const shouldActivate = async () => {
         // Arrange
@@ -44,23 +34,29 @@ suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
 
     describe("addKeyToInterface", () => {
-        // beforeEach(() => {
-        //     cleanupFixtures();
-        // });
-
-        // afterEach(() => {
-        //     cleanupFixtures();
-        // });
+        beforeEach(() => {
+            TestUtils.cleanTmpDirectory();
+        });
 
         describe("given interface is empty", () => {
             let tmpDirectory: string;
             beforeEach(async () => {
-                tmpDirectory = TestUtils.copyFixturesToTmpDirectory("empty");
-                console.log("tmpDirectory:", tmpDirectory);
+                tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.Empty
+                );
+                const cultureInterfacePath = TestUtils.getInterfacePath(
+                    tmpDirectory
+                );
+                const cultureFilePaths = TestUtils.getCultureFilePaths(
+                    tmpDirectory
+                );
+
                 await TestUtils.mergeConfig({
-                    cultureInterfacePath: `${tmpDirectory}/**/interfaces/*.ts`,
-                    cultureFilePaths: [`${tmpDirectory}/**/cultures/*.ts`],
+                    cultureInterfacePath,
+                    cultureFilePaths,
                 });
+
+                await shouldActivate();
             });
 
             test("inserts key into interface, returns created key", async () => {
@@ -69,9 +65,11 @@ suite("kazoo", () => {
 
                 // Act
                 const result = await kazoo.addKeyToInterface(key);
+                const cultureInterface = await ProjectUtils.getCultureInterface();
 
                 // Assert
                 assert.equal(result, key);
+                cultureInterface.getPropertyOrThrow(key);
             });
         });
     });
