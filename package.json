@@ -134,7 +134,7 @@
         "prebuild:test": "npm run clean",
         "pretest": "npm run build:test && npm run lint",
         "prevscode:publish": "npm run build:dist",
-        "test": "node ./dist/test/runTest.js",
+        "test": "node ./dist/test/runTest.js --ci",
         "vscode:pack": "vsce package",
         "vscode:publish": "npm run vscode:pack && vsce publish",
         "watch": "npm run esbuild -- --sourcemap --watch"

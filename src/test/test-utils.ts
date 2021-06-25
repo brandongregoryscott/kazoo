@@ -35,18 +35,20 @@ const TestUtils = {
         setShelljsFatal(true);
 
         const workspace = WorkspaceUtils.getFolder();
+        const workspaceRoot = appendTestDirectoryIfCI(workspace!);
+
         const tmpDirectory = upath.join("tmp", faker.datatype.uuid());
-        const absoluteTmpDirectory = upath.join(workspace, tmpDirectory);
-        const fixturesDirectory = upath.join(workspace, "fixtures", fixture);
+        const sourceFixtures = upath.join(workspaceRoot, "fixtures", fixture);
+        const destinationFixtures = upath.join(workspaceRoot, tmpDirectory);
 
         // Ensure temporary directory exists
-        shell.mkdir("-p", absoluteTmpDirectory);
-        shell.cp("-R", fixturesDirectory, absoluteTmpDirectory);
+        shell.mkdir("-p", destinationFixtures);
+        shell.cp("-R", sourceFixtures, destinationFixtures);
 
         setShelljsFatal(false);
 
         // Configuration expects relative path
-        return tmpDirectory;
+        return appendTestDirectoryIfCI(tmpDirectory);
     },
     cleanTmpDirectory(): void {
         setShelljsFatal(true);
@@ -58,6 +60,10 @@ const TestUtils = {
     },
     getCultureFilePaths(tmpDirectory: string): string[] {
         return [upath.join(tmpDirectory, "**", "cultures", "*.ts")];
+    },
+    isCI(): boolean {
+        const ci = process.env["CI"];
+        return ci != null && ci.toLowerCase() === "true";
     },
     async mergeConfig(
         updated: Partial<ExtensionConfiguration>
@@ -83,7 +89,16 @@ const TestUtils = {
 };
 // #endregion Public Functions
 
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const appendTestDirectoryIfCI = (path: string): string =>
+    TestUtils.isCI() ? upath.join("src", "test", path) : path;
+
 const setShelljsFatal = (fatal: boolean) => (shell.config.fatal = fatal);
+
+// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
