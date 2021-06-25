@@ -9,6 +9,8 @@ on:
 
 jobs:
     build:
+        env:
+            DISPLAY: :0
         runs-on: ubuntu-latest
         if: always()
 
@@ -28,6 +30,8 @@ jobs:
               run: |
                   npm run build
 
-            - name: npm run test
-              run: |
-                  npm run test
+            - name: npm test
+              uses: GabrielBB/xvfb-action@v1.0
+              with:
+                  run: |
+                      npm test
