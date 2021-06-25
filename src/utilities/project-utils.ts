@@ -4,19 +4,6 @@ import { WindowUtils } from "./window-utils";
 import { FileUtils } from "./file-utils";
 
 // -----------------------------------------------------------------------------------------
-// #region Constants
-// -----------------------------------------------------------------------------------------
-
-const ERROR_CULTURE_FILES_NOT_FOUND = `Error - no culture files could be found matching patterns ${JSON.stringify(
-    ConfigUtils.get().cultureFilePaths
-)}. Please check the paths in your settings.`;
-const ERROR_CULTURE_INTERFACE_NOT_FOUND = `Error - culture interface could not be found matching path ${
-    ConfigUtils.get().cultureInterfacePath
-}. Please check the path in your settings.`;
-
-// #endregion Constants
-
-// -----------------------------------------------------------------------------------------
 // #region Variables
 // -----------------------------------------------------------------------------------------
 
@@ -33,8 +20,11 @@ const get = (): Project => _project;
 const getCultureFiles = async (): Promise<SourceFile[]> => {
     const paths = await _getCultureFilePaths();
     if (paths == null) {
-        throw new Error(ERROR_CULTURE_FILES_NOT_FOUND);
+        throw new Error(_getCultureFilesNotFoundError());
     }
+
+    // If the paths have been resolved, add the source files just in-case they weren't present during initialization
+    _project.addSourceFilesAtPaths(paths);
 
     const files = _project.getSourceFiles(paths);
     await Promise.all(files.map((file) => file.refreshFromFileSystem()));
@@ -47,8 +37,11 @@ const getCultureInterface = async (): Promise<InterfaceDeclaration> =>
 const getCultureInterfaceFile = async (): Promise<SourceFile> => {
     const path = await _getCultureInterfacePath();
     if (path == null) {
-        throw new Error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
+        throw new Error(_getCultureInterfaceNotFoundError());
     }
+
+    // If the path has been resolved, add the source file just in-case it wasn't present during initialization
+    _project.addSourceFileAtPathIfExists(path);
 
     const file = _project.getSourceFileOrThrow(path);
     await file.refreshFromFileSystem();
@@ -76,13 +69,11 @@ const initializeFromConfig = async (): Promise<Project> => {
 // -----------------------------------------------------------------------------------------
 
 const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
-    const resolvedPaths = await FileUtils.findAll(
-        ConfigUtils.get().cultureFilePaths
-    );
+    const { cultureFilePaths } = ConfigUtils.get();
+    const resolvedPaths = await FileUtils.findAll(cultureFilePaths);
 
-    // BSCOTT - is this the right place to be handling errors?
     if (resolvedPaths.length <= 0) {
-        WindowUtils.error(ERROR_CULTURE_FILES_NOT_FOUND);
+        WindowUtils.error(_getCultureFilesNotFoundError());
 
         return undefined;
     }
@@ -90,14 +81,24 @@ const _getCultureFilePaths = async (): Promise<string[] | undefined> => {
     return resolvedPaths;
 };
 
-const _getCultureInterfacePath = async (): Promise<string | undefined> => {
-    const path = await FileUtils.findFirst(
-        ConfigUtils.get().cultureInterfacePath
-    );
+const _getCultureFilesNotFoundError = (): string => {
+    const paths = ConfigUtils.get().cultureFilePaths.join(", ");
 
-    // BSCOTT - is this the right place to be handling errors?
+    return `Error - no culture files could be found matching patterns '${paths}'. Please check the paths in your settings.`;
+};
+
+const _getCultureInterfaceNotFoundError = (): string => {
+    const { cultureInterfacePath: path } = ConfigUtils.get();
+
+    return `Error - culture interface could not be found matching path '${path}'. Please check the path in your settings.`;
+};
+
+const _getCultureInterfacePath = async (): Promise<string | undefined> => {
+    const { cultureInterfacePath } = ConfigUtils.get();
+    const path = await FileUtils.findFirst(cultureInterfacePath);
+
     if (path == null) {
-        WindowUtils.error(ERROR_CULTURE_INTERFACE_NOT_FOUND);
+        WindowUtils.error(_getCultureInterfaceNotFoundError());
 
         return undefined;
     }
