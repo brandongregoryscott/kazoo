@@ -71,6 +71,11 @@ const TestUtils = {
         const existing = await ConfigUtils.get();
         return this.setConfig({ ...existing, ...updated });
     },
+    async mergeConfigForTmpDirectory(tmpDirectory: string): Promise<void[]> {
+        const cultureInterfacePath = this.getInterfacePath(tmpDirectory);
+        const cultureFilePaths = this.getCultureFilePaths(tmpDirectory);
+        return this.mergeConfig({ cultureFilePaths, cultureInterfacePath });
+    },
     async setConfig(updated: ExtensionConfiguration): Promise<void[]> {
         const config = vscode.workspace.getConfiguration(ConfigUtils.key);
         const keys = Object.keys(updated) as Array<
