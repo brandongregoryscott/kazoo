@@ -10,7 +10,7 @@ const DEFAULT_LANGUAGE_CODE = "en";
  * Note: intentionally making the patterns loosely match since Google Translate does not seem to
  * support specific locale variants of languages
  */
-const LanguageCodeMap: Record<string, string> = {
+const LanguageCodeMap = {
     English: "en",
     Spanish: "es",
 };

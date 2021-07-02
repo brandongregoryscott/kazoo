@@ -20,6 +20,7 @@ const { defaultConfig } = ConfigUtils;
 
 enum TestFixtures {
     Empty = "empty",
+    Issue15 = "issue-15",
     FiveKeysAlphabetized = "5-keys-alphabetized",
     SixHundredKeys = "600-keys",
 }

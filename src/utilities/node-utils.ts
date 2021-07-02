@@ -18,13 +18,18 @@ import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const findPropertyByName = (
+const findPropertyByName = <TProperty extends Property>(
     name: string,
-    properties: Property[]
-): Property | undefined => {
+    properties: TProperty[]
+): TProperty | undefined =>
+    properties[findPropertyIndexByName(name, properties)];
+
+const findPropertyIndexByName = <TProperty extends Property>(
+    name: string,
+    properties: TProperty[]
+): number => {
     const names = properties.map((property) => _trimPropertyName(property));
-    const index = names.indexOf(name);
-    return properties[index];
+    return names.indexOf(name);
 };
 
 const findIndex = (
@@ -220,6 +225,7 @@ export const NodeUtils = {
     findIndex,
     findIdentifier,
     findObjectLiteralExpressionWithProperty,
+    findPropertyIndexByName,
     findPropertyByName,
     getPropertyAssignments,
     isObjectLiteralExpressionWithProperty,

@@ -6,6 +6,9 @@ import { TestFixtures, TestUtils } from "../test-utils";
 import { ProjectUtils } from "../../utilities/project-utils";
 import _ from "lodash";
 import { InsertionPosition } from "../../enums/insertion-position";
+import { NodeUtils } from "../../utilities/node-utils";
+import { SourceFileUtils } from "../../utilities/source-file-utils";
+import { PropertyAssignment } from "ts-morph";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -24,6 +27,8 @@ suite("kazoo", () => {
         // Assert
         assert.equal(extension?.isActive, true);
     };
+
+    const { findPropertyIndexByName } = NodeUtils;
 
     // #endregion Setup
 
@@ -156,4 +161,80 @@ suite("kazoo", () => {
     });
 
     // #endregion addKeyToInterface
+
+    // -----------------------------------------------------------------------------------------
+    // #region addTranslationToCultureFiles
+    // -----------------------------------------------------------------------------------------
+
+    describe("addTranslationToCultureFiles", () => {
+        /**
+         * https://github.com/brandongregoryscott/kazoo/issues/15
+         */
+        describe("given culture file has split object literals", () => {
+            beforeEach(async () => {
+                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.Issue15
+                );
+                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
+
+                await shouldActivate();
+            });
+
+            describe(`when insertionPosition '${InsertionPosition.LooseAlphabetical}'`, () => {
+                test("inserts translation into culture file at expected position, returns list of translations", async () => {
+                    // Arrange
+                    const key = "not-found-page-description";
+                    const expectedAfterKey = "login-offline-warning";
+                    const expectedBeforeKey = "offline-removeOfflineBookError";
+                    const translation = "Not found page";
+
+                    // Act
+                    const result = await kazoo.addTranslationToCultureFiles(
+                        key,
+                        translation
+                    );
+                    const cultureFiles = await ProjectUtils.getCultureFiles();
+                    const cultureFile = await ProjectUtils.getCultureFileByLanguage(
+                        "Spanish"
+                    );
+
+                    // Assert
+                    assert.equal(result.length, cultureFiles.length);
+
+                    const resourceObject = SourceFileUtils.getResourcesObject(
+                        cultureFile!
+                    );
+                    const properties = NodeUtils.getPropertyAssignments(
+                        resourceObject!
+                    );
+                    const expectedAfterIndex = findPropertyIndexByName(
+                        expectedAfterKey,
+                        properties
+                    );
+                    const expectedBeforeIndex = findPropertyIndexByName(
+                        expectedBeforeKey,
+                        properties
+                    );
+
+                    const actualIndex = findPropertyIndexByName(
+                        key,
+                        properties
+                    );
+
+                    assert.equal(
+                        actualIndex,
+                        expectedBeforeIndex - 1,
+                        `Expected '${key}' to appear alphabetically before '${expectedBeforeKey}'`
+                    );
+                    assert.equal(
+                        actualIndex,
+                        expectedAfterIndex + 1,
+                        `Expected '${key}' to appear alphabetically after '${expectedAfterKey}'`
+                    );
+                });
+            });
+        });
+    });
+
+    // #endregion addTranslationToCultureFiles
 });

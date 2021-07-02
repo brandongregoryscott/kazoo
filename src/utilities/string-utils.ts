@@ -26,7 +26,8 @@ const StringUtils = {
                 return;
             }
 
-            languageCode = LanguageCodeMap[pattern];
+            languageCode =
+                LanguageCodeMap[pattern as keyof typeof LanguageCodeMap];
         });
 
         return languageCode;

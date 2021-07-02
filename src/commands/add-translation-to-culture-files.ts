@@ -15,6 +15,7 @@ import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { Property } from "../types/property";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { CoreUtils } from "../utilities/core-utils";
+import _ from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,7 +24,7 @@ import { CoreUtils } from "../utilities/core-utils";
 const addTranslationToCultureFiles = async (
     key?: string,
     translation?: string
-) => {
+): Promise<OptionalKind<PropertyAssignmentStructure>[]> => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
         const cultureFiles = await ProjectUtils.getCultureFiles();
@@ -35,7 +36,7 @@ const addTranslationToCultureFiles = async (
         }
 
         if (key == null) {
-            return;
+            return [];
         }
 
         if (translation == null) {
@@ -45,21 +46,25 @@ const addTranslationToCultureFiles = async (
         }
 
         if (translation == null) {
-            return;
+            return [];
         }
 
-        const transformations = cultureFiles.map((file) =>
+        const transformationPromises = cultureFiles.map((file) =>
             _addTranslationToFile(file, key!, translation!)
         );
 
-        await Promise.all(transformations);
+        const transformations = await Promise.all(transformationPromises);
 
         WindowUtils.info(
             `Successfully updated ${transformations.length} culture files!`
         );
+
+        return _.compact(transformations);
     } catch (error) {
         CoreUtils.catch("addTranslationToCultureFiles", error);
     }
+
+    return [];
 };
 
 // #endregion Public Functions
@@ -72,7 +77,7 @@ const _addTranslationToFile = async (
     file: SourceFile,
     key: string,
     value: string
-) => {
+): Promise<OptionalKind<PropertyAssignmentStructure> | undefined> => {
     const baseLanguage = SourceFileUtils.getBaseLanguage(file);
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
@@ -103,7 +108,9 @@ const _addTranslationToFile = async (
         NodeUtils.sortPropertyAssignments(resourceObject);
     }
 
-    return file.save();
+    await file.save();
+
+    return newProperty;
 };
 
 const _buildNewProperty = async (
