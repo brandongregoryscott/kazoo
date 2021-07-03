@@ -8,25 +8,18 @@ import _ from "lodash";
 import { InsertionPosition } from "../../enums/insertion-position";
 import { NodeUtils } from "../../utilities/node-utils";
 import { SourceFileUtils } from "../../utilities/source-file-utils";
-import { PropertyAssignment } from "ts-morph";
+import { shouldActivate } from "../shared/specs";
+import {
+    whenEndPosition,
+    whenLooseAlphabetical,
+    whenStartPosition,
+    whenStrictAlphabetical,
+} from "../shared/describes";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
     // #region Setup
     // -----------------------------------------------------------------------------------------
-
-    const shouldActivate = async () => {
-        // Arrange
-        const extension = vscode.extensions.getExtension(
-            "brandongregoryscott.kazoo"
-        );
-
-        // Act
-        await extension?.activate();
-
-        // Assert
-        assert.equal(extension?.isActive, true);
-    };
 
     const { findPropertyIndexByName } = NodeUtils;
 
@@ -77,7 +70,7 @@ suite("kazoo", () => {
                 await shouldActivate();
             });
 
-            describe(`when insertionPosition '${InsertionPosition.LooseAlphabetical}'`, () => {
+            whenLooseAlphabetical(() => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
@@ -95,7 +88,7 @@ suite("kazoo", () => {
                 });
             });
 
-            describe(`when insertionPosition '${InsertionPosition.StrictAlphabetical}'`, () => {
+            whenStrictAlphabetical(() => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
@@ -116,7 +109,7 @@ suite("kazoo", () => {
                 });
             });
 
-            describe(`when insertionPosition '${InsertionPosition.Start}'`, () => {
+            whenStartPosition(() => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
@@ -137,7 +130,7 @@ suite("kazoo", () => {
                 });
             });
 
-            describe(`when insertionPosition '${InsertionPosition.End}'`, () => {
+            whenEndPosition(() => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
@@ -180,7 +173,7 @@ suite("kazoo", () => {
                 await shouldActivate();
             });
 
-            describe(`when insertionPosition '${InsertionPosition.LooseAlphabetical}'`, () => {
+            whenLooseAlphabetical(() => {
                 test("inserts translation into culture file at expected position, returns list of translations", async () => {
                     // Arrange
                     const key = "not-found-page-description";
