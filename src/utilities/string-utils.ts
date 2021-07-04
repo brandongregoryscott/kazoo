@@ -1,4 +1,5 @@
 import { LanguageCodeMap } from "../constants/language-code-map";
+import { Language } from "../enums/language";
 import { Property } from "../types/property";
 import { NodeUtils } from "./node-utils";
 
@@ -14,23 +15,11 @@ const StringUtils = {
         if (variableName == null) {
             return undefined;
         }
+        const languages = Object.keys(LanguageCodeMap) as Language[];
 
-        const patterns = Object.keys(LanguageCodeMap);
-
-        let languageCode: string | undefined = undefined;
-        patterns.forEach((pattern) => {
-            if (
-                languageCode != null ||
-                !new RegExp(pattern).test(variableName)
-            ) {
-                return;
-            }
-
-            languageCode =
-                LanguageCodeMap[pattern as keyof typeof LanguageCodeMap];
-        });
-
-        return languageCode;
+        return languages.find((language: Language) =>
+            new RegExp(language).test(variableName)
+        );
     },
     quoteEscape(value: string): string {
         const quote = `"`;

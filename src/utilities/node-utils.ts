@@ -75,6 +75,11 @@ const getPropertyAssignments = (
             Node.isPropertyAssignment(node)
         ) as PropertyAssignment[];
 
+const getNameOrText = <T extends Node>(node: T): string => {
+    const nameOrText = Node.hasName(node) ? node.getName() : node.getText();
+    return StringUtils.stripQuotes(nameOrText);
+};
+
 const isObjectLiteralExpressionWithProperty = (
     node: Node,
     property: string
@@ -191,17 +196,13 @@ const shouldQuoteEscapeNewProperty = (
         return true;
     }
 
-    if (
-        // If every property starts & ends with quotes, it must be an enforced style. Keep it consistent.
+    // If every property starts & ends with quotes, it must be an enforced style. Keep it consistent.
+    return (
         existing.length > 0 &&
         existing.every((property) =>
             property.getName().match(/["']{1}[a-zA-Z0-9 _\-]+["']{1}/)
         )
-    ) {
-        return true;
-    }
-
-    return false;
+    );
 };
 
 // #endregion Public Functions
@@ -211,7 +212,7 @@ const shouldQuoteEscapeNewProperty = (
 // -----------------------------------------------------------------------------------------
 
 const trimName = <T extends NamedNodeSpecificBase<Node>>(node: T) =>
-    node.getName().replace(/['"]/g, "");
+    StringUtils.stripQuotes(node.getName());
 
 // #endregion Private Functions
 
@@ -226,10 +227,7 @@ export const NodeUtils = {
     findPropertyIndexByName,
     findPropertyByName,
     getPropertyAssignments,
-    getNameOrText<T extends Node>(node: T): string {
-        const nameOrText = Node.hasName(node) ? node.getName() : node.getText();
-        return nameOrText.replace(/['"]/g, "");
-    },
+    getNameOrText,
     isObjectLiteralExpressionWithProperty,
     mapToPropertyAssignments,
     shouldQuoteEscapeNewProperty,

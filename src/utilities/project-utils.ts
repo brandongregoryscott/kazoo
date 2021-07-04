@@ -2,9 +2,7 @@ import { InterfaceDeclaration, Project, SourceFile } from "ts-morph";
 import { ConfigUtils } from "./config-utils";
 import { WindowUtils } from "./window-utils";
 import { FileUtils } from "./file-utils";
-import { StringUtils } from "./string-utils";
-import { LanguageCodeMap } from "../constants/language-code-map";
-import { NodeUtils } from "./node-utils";
+import { Language } from "../enums/language";
 
 // -----------------------------------------------------------------------------------------
 // #region Variables
@@ -21,7 +19,7 @@ let _project: Project = new Project();
 const get = (): Project => _project;
 
 const getCultureFileByLanguage = async (
-    language: keyof typeof LanguageCodeMap
+    language: Language
 ): Promise<SourceFile | undefined> => {
     const cultureFiles = await getCultureFiles();
 

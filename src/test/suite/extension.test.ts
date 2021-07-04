@@ -15,6 +15,7 @@ import {
     whenStartPosition,
     whenStrictAlphabetical,
 } from "../shared/describes";
+import { Language } from "../../enums/language";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -192,7 +193,7 @@ suite("kazoo", () => {
                     );
                     const cultureFiles = await ProjectUtils.getCultureFiles();
                     const cultureFile = await ProjectUtils.getCultureFileByLanguage(
-                        "Spanish"
+                        Language.Spanish
                     );
 
                     // Assert

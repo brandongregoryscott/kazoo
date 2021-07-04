@@ -1,8 +1,9 @@
+import { Language } from "../enums/language";
+import { LanguageCode } from "../enums/language-code";
+
 // -----------------------------------------------------------------------------------------
 // #region Constants
 // -----------------------------------------------------------------------------------------
-
-const DEFAULT_LANGUAGE_CODE = "en";
 
 /**
  * Mapping variable name patterns to Google Translate API supported language codes
@@ -10,9 +11,9 @@ const DEFAULT_LANGUAGE_CODE = "en";
  * Note: intentionally making the patterns loosely match since Google Translate does not seem to
  * support specific locale variants of languages
  */
-const LanguageCodeMap = {
-    English: "en",
-    Spanish: "es",
+const LanguageCodeMap: Record<Language, LanguageCode> = {
+    English: LanguageCode.English,
+    Spanish: LanguageCode.Spanish,
 };
 
 // #endregion Constants
@@ -21,6 +22,6 @@ const LanguageCodeMap = {
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { DEFAULT_LANGUAGE_CODE, LanguageCodeMap };
+export { LanguageCodeMap };
 
 // #endregion Exports

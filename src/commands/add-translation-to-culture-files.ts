@@ -13,10 +13,10 @@ import { ConfigUtils } from "../utilities/config-utils";
 import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
 import translate from "@vitalets/google-translate-api";
-import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { CoreUtils } from "../utilities/core-utils";
 import _ from "lodash";
+import { LanguageCode } from "../enums/language-code";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -117,26 +117,26 @@ const _addTranslationToFile = async (
 const _buildNewProperty = async (
     key: string,
     value: string,
-    assignments: ObjectLiteralElementLike[],
+    properties: ObjectLiteralElementLike[],
     baseLanguage?: Identifier
 ): Promise<OptionalKind<PropertyAssignmentStructure>> => {
     const matchedLanguage = StringUtils.matchLanguageCode(
         baseLanguage?.getText()
     );
 
-    const properties = assignments.filter(Node.isPropertyAssignment);
+    const propertyAssignments = properties.filter(Node.isPropertyAssignment);
     const property: OptionalKind<PropertyAssignmentStructure> = {
         initializer: StringUtils.quoteEscape(value),
-        name: StringUtils.quoteEscapeIfNeeded(key, properties),
+        name: StringUtils.quoteEscapeIfNeeded(key, propertyAssignments),
     };
 
-    if (matchedLanguage == null || matchedLanguage === DEFAULT_LANGUAGE_CODE) {
+    if (matchedLanguage == null || matchedLanguage === LanguageCode.Default) {
         return property;
     }
 
     try {
         const translationResult = await translate(value, {
-            from: DEFAULT_LANGUAGE_CODE,
+            from: LanguageCode.Default,
             to: matchedLanguage,
         });
 
