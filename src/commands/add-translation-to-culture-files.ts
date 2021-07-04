@@ -1,6 +1,8 @@
 import { ProjectUtils } from "../utilities/project-utils";
 import {
     Identifier,
+    Node,
+    ObjectLiteralElementLike,
     OptionalKind,
     PropertyAssignmentStructure,
     SourceFile,
@@ -12,7 +14,6 @@ import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
 import translate from "@vitalets/google-translate-api";
 import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
-import { Property } from "../types/property";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { CoreUtils } from "../utilities/core-utils";
 import _ from "lodash";
@@ -85,7 +86,7 @@ const _addTranslationToFile = async (
         return;
     }
 
-    const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
+    const existingProperties = resourceObject.getProperties();
 
     const newProperty = await _buildNewProperty(
         key,
@@ -116,16 +117,17 @@ const _addTranslationToFile = async (
 const _buildNewProperty = async (
     key: string,
     value: string,
-    existingProperties: Property[],
+    assignments: ObjectLiteralElementLike[],
     baseLanguage?: Identifier
 ): Promise<OptionalKind<PropertyAssignmentStructure>> => {
     const matchedLanguage = StringUtils.matchLanguageCode(
         baseLanguage?.getText()
     );
 
+    const properties = assignments.filter(Node.isPropertyAssignment);
     const property: OptionalKind<PropertyAssignmentStructure> = {
-        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
         initializer: StringUtils.quoteEscape(value),
+        name: StringUtils.quoteEscapeIfNeeded(key, properties),
     };
 
     if (matchedLanguage == null || matchedLanguage === DEFAULT_LANGUAGE_CODE) {
@@ -138,10 +140,11 @@ const _buildNewProperty = async (
             to: matchedLanguage,
         });
 
-        return {
-            name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+        const translatedProperty = {
+            ...property,
             initializer: StringUtils.quoteEscape(translationResult.text),
         };
+        return translatedProperty;
     } catch (error) {
         WindowUtils.error(
             `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`

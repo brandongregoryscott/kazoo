@@ -1,11 +1,14 @@
 import {
     Identifier,
     InterfaceDeclaration,
+    NamedNodeSpecificBase,
     Node,
+    ObjectLiteralElementLike,
     ObjectLiteralExpression,
     OptionalKind,
     PropertyAssignment,
     PropertyAssignmentStructure,
+    PropertySignature,
     PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
@@ -28,14 +31,14 @@ const findPropertyIndexByName = <TProperty extends Property>(
     name: string,
     properties: TProperty[]
 ): number => {
-    const names = properties.map((property) => _trimPropertyName(property));
+    const names = properties.map(NodeUtils.getNameOrText);
     return names.indexOf(name);
 };
 
 const findIndex = (
     position: InsertionPosition,
     name: string,
-    properties: Property[]
+    properties: Array<ObjectLiteralElementLike | PropertySignature>
 ): number => {
     if (position === InsertionPosition.Start) {
         return 0;
@@ -47,10 +50,7 @@ const findIndex = (
 
     // If position is alphabetical, we'll assume the consumer is handling 'strict' alphabetization
     // due to reordering of entire property array
-    const names = [
-        ...properties.map((property) => _trimPropertyName(property)),
-        name,
-    ].sort();
+    const names = [...properties.map(NodeUtils.getNameOrText), name].sort();
 
     return names.indexOf(name);
 };
@@ -179,9 +179,7 @@ const sortPropertiesByName = <
     properties: Property[]
 ) =>
     properties
-        .sort((a, b) =>
-            _trimPropertyName(a).localeCompare(_trimPropertyName(b))
-        )
+        .sort((a, b) => trimName(a).localeCompare(trimName(b)))
         .map((property) => property.getStructure() as TPropertyStructure);
 
 const shouldQuoteEscapeNewProperty = (
@@ -212,8 +210,8 @@ const shouldQuoteEscapeNewProperty = (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const _trimPropertyName = (property: Property) =>
-    property.getName().replace(/['"]/g, "");
+const trimName = <T extends NamedNodeSpecificBase<Node>>(node: T) =>
+    node.getName().replace(/['"]/g, "");
 
 // #endregion Private Functions
 
@@ -228,6 +226,10 @@ export const NodeUtils = {
     findPropertyIndexByName,
     findPropertyByName,
     getPropertyAssignments,
+    getNameOrText<T extends Node>(node: T): string {
+        const nameOrText = Node.hasName(node) ? node.getName() : node.getText();
+        return nameOrText.replace(/['"]/g, "");
+    },
     isObjectLiteralExpressionWithProperty,
     mapToPropertyAssignments,
     shouldQuoteEscapeNewProperty,

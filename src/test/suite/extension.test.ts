@@ -23,6 +23,10 @@ suite("kazoo", () => {
 
     const { findPropertyIndexByName } = NodeUtils;
 
+    beforeEach(async () => {
+        await TestUtils.resetConfig();
+    });
+
     // #endregion Setup
 
     test("should activate extension", shouldActivate);
@@ -163,7 +167,7 @@ suite("kazoo", () => {
         /**
          * https://github.com/brandongregoryscott/kazoo/issues/15
          */
-        describe("given culture file has split object literals", () => {
+        describe("given culture file has spread assignment in object literal", () => {
             beforeEach(async () => {
                 const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
                     TestFixtures.Issue15
@@ -192,7 +196,11 @@ suite("kazoo", () => {
                     );
 
                     // Assert
-                    assert.equal(result.length, cultureFiles.length);
+                    assert.equal(
+                        result.length,
+                        cultureFiles.length,
+                        "Expected number of translations to match number of culture files found."
+                    );
 
                     const resourceObject = SourceFileUtils.getResourcesObject(
                         cultureFile!
