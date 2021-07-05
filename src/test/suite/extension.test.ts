@@ -16,6 +16,7 @@ import {
     whenStrictAlphabetical,
 } from "../shared/describes";
 import { Language } from "../../enums/language";
+import faker from "faker";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -232,6 +233,45 @@ suite("kazoo", () => {
                         actualIndex,
                         expectedAfterIndex + 1,
                         `Expected '${key}' to appear alphabetically after '${expectedAfterKey}'`
+                    );
+                });
+            });
+        });
+
+        describe("given culture file has 100+ entries", () => {
+            beforeEach(async () => {
+                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.SixHundredKeys
+                );
+                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
+
+                await shouldActivate();
+            });
+
+            whenStrictAlphabetical(() => {
+                test.only("performs full sort of culture file in under 3s", async () => {
+                    // Arrange
+                    await TestUtils.mergeConfig({
+                        insertionPosition: InsertionPosition.StrictAlphabetical,
+                    });
+                    const start = new Date();
+                    const key = faker.datatype.string();
+                    const translation = faker.random.words();
+
+                    // Act
+                    const result = await kazoo.addTranslationToCultureFiles(
+                        key,
+                        translation
+                    );
+
+                    // Assert
+                    const end = new Date();
+                    const elapsedSeconds: number =
+                        ((end as any) - (start as any)) / 1000;
+                    assert.equal(
+                        elapsedSeconds < 3,
+                        true,
+                        `Expected ${InsertionPosition.StrictAlphabetical} sorting to complete in 3s or less. Actual: ${elapsedSeconds}`
                     );
                 });
             });
