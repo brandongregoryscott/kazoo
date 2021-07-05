@@ -1,6 +1,8 @@
 import { ProjectUtils } from "../utilities/project-utils";
 import {
     Identifier,
+    Node,
+    ObjectLiteralElementLike,
     OptionalKind,
     PropertyAssignmentStructure,
     SourceFile,
@@ -11,10 +13,10 @@ import { ConfigUtils } from "../utilities/config-utils";
 import { InsertionPosition } from "../enums/insertion-position";
 import { WindowUtils } from "../utilities/window-utils";
 import translate from "@vitalets/google-translate-api";
-import { DEFAULT_LANGUAGE_CODE } from "../constants/language-code-map";
-import { Property } from "../types/property";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { CoreUtils } from "../utilities/core-utils";
+import _ from "lodash";
+import { LanguageCode } from "../enums/language-code";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -23,7 +25,7 @@ import { CoreUtils } from "../utilities/core-utils";
 const addTranslationToCultureFiles = async (
     key?: string,
     translation?: string
-) => {
+): Promise<OptionalKind<PropertyAssignmentStructure>[]> => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
         const cultureFiles = await ProjectUtils.getCultureFiles();
@@ -35,7 +37,7 @@ const addTranslationToCultureFiles = async (
         }
 
         if (key == null) {
-            return;
+            return [];
         }
 
         if (translation == null) {
@@ -45,21 +47,25 @@ const addTranslationToCultureFiles = async (
         }
 
         if (translation == null) {
-            return;
+            return [];
         }
 
-        const transformations = cultureFiles.map((file) =>
+        const transformationPromises = cultureFiles.map((file) =>
             _addTranslationToFile(file, key!, translation!)
         );
 
-        await Promise.all(transformations);
+        const transformations = await Promise.all(transformationPromises);
 
         WindowUtils.info(
             `Successfully updated ${transformations.length} culture files!`
         );
+
+        return _.compact(transformations);
     } catch (error) {
         CoreUtils.catch("addTranslationToCultureFiles", error);
     }
+
+    return [];
 };
 
 // #endregion Public Functions
@@ -72,7 +78,7 @@ const _addTranslationToFile = async (
     file: SourceFile,
     key: string,
     value: string
-) => {
+): Promise<OptionalKind<PropertyAssignmentStructure> | undefined> => {
     const baseLanguage = SourceFileUtils.getBaseLanguage(file);
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
@@ -80,7 +86,7 @@ const _addTranslationToFile = async (
         return;
     }
 
-    const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
+    const existingProperties = resourceObject.getProperties();
 
     const newProperty = await _buildNewProperty(
         key,
@@ -103,38 +109,42 @@ const _addTranslationToFile = async (
         NodeUtils.sortPropertyAssignments(resourceObject);
     }
 
-    return file.save();
+    await file.save();
+
+    return newProperty;
 };
 
 const _buildNewProperty = async (
     key: string,
     value: string,
-    existingProperties: Property[],
+    properties: ObjectLiteralElementLike[],
     baseLanguage?: Identifier
 ): Promise<OptionalKind<PropertyAssignmentStructure>> => {
     const matchedLanguage = StringUtils.matchLanguageCode(
         baseLanguage?.getText()
     );
 
+    const propertyAssignments = properties.filter(Node.isPropertyAssignment);
     const property: OptionalKind<PropertyAssignmentStructure> = {
-        name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
         initializer: StringUtils.quoteEscape(value),
+        name: StringUtils.quoteEscapeIfNeeded(key, propertyAssignments),
     };
 
-    if (matchedLanguage == null || matchedLanguage === DEFAULT_LANGUAGE_CODE) {
+    if (matchedLanguage == null || matchedLanguage === LanguageCode.Default) {
         return property;
     }
 
     try {
         const translationResult = await translate(value, {
-            from: DEFAULT_LANGUAGE_CODE,
+            from: LanguageCode.Default,
             to: matchedLanguage,
         });
 
-        return {
-            name: StringUtils.quoteEscapeIfNeeded(key, existingProperties),
+        const translatedProperty = {
+            ...property,
             initializer: StringUtils.quoteEscape(translationResult.text),
         };
+        return translatedProperty;
     } catch (error) {
         WindowUtils.error(
             `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`

@@ -20,6 +20,7 @@ const { defaultConfig } = ConfigUtils;
 
 enum TestFixtures {
     Empty = "empty",
+    Issue15 = "issue-15",
     FiveKeysAlphabetized = "5-keys-alphabetized",
     SixHundredKeys = "600-keys",
 }
@@ -70,6 +71,11 @@ const TestUtils = {
     ): Promise<void[]> {
         const existing = await ConfigUtils.get();
         return this.setConfig({ ...existing, ...updated });
+    },
+    async mergeConfigForTmpDirectory(tmpDirectory: string): Promise<void[]> {
+        const cultureInterfacePath = this.getInterfacePath(tmpDirectory);
+        const cultureFilePaths = this.getCultureFilePaths(tmpDirectory);
+        return this.mergeConfig({ cultureFilePaths, cultureInterfacePath });
     },
     async setConfig(updated: ExtensionConfiguration): Promise<void[]> {
         const config = vscode.workspace.getConfiguration(ConfigUtils.key);
