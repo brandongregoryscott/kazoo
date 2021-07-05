@@ -1,5 +1,4 @@
 import assert from "assert";
-import vscode from "vscode";
 import { describe, beforeEach } from "mocha";
 import * as kazoo from "../../extension";
 import { TestFixtures, TestUtils } from "../test-utils";
@@ -259,10 +258,7 @@ suite("kazoo", () => {
                     const translation = faker.random.words();
 
                     // Act
-                    const result = await kazoo.addTranslationToCultureFiles(
-                        key,
-                        translation
-                    );
+                    await kazoo.addTranslationToCultureFiles(key, translation);
 
                     // Assert
                     const end = new Date();
