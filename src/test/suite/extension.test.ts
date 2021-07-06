@@ -16,6 +16,8 @@ import {
 } from "../shared/describes";
 import { Language } from "../../enums/language";
 import faker from "faker";
+import sinon from "sinon";
+import { StringUtils } from "../../utilities/string-utils";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -237,6 +239,9 @@ suite("kazoo", () => {
             });
         });
 
+        /**
+         * https://github.com/brandongregoryscott/kazoo/issues/17
+         */
         describe("given culture file has 100+ entries", () => {
             beforeEach(async () => {
                 const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
@@ -248,14 +253,18 @@ suite("kazoo", () => {
             });
 
             whenStrictAlphabetical(() => {
-                test.only("performs full sort of culture file in under 3s", async () => {
+                test.only("performs full sort of culture file in under 1s", async () => {
                     // Arrange
+                    const expected = 1;
                     await TestUtils.mergeConfig({
                         insertionPosition: InsertionPosition.StrictAlphabetical,
                     });
                     const start = new Date();
-                    const key = faker.datatype.string();
+                    const key = faker.random.word();
                     const translation = faker.random.words();
+                    sinon
+                        .stub(StringUtils, "translate")
+                        .resolves(faker.random.words());
 
                     // Act
                     await kazoo.addTranslationToCultureFiles(key, translation);
@@ -265,9 +274,9 @@ suite("kazoo", () => {
                     const elapsedSeconds: number =
                         ((end as any) - (start as any)) / 1000;
                     assert.equal(
-                        elapsedSeconds < 3,
+                        elapsedSeconds < expected,
                         true,
-                        `Expected ${InsertionPosition.StrictAlphabetical} sorting to complete in 3s or less. Actual: ${elapsedSeconds}`
+                        `Expected ${InsertionPosition.StrictAlphabetical} sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
                     );
                 });
             });
