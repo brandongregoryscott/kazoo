@@ -16,6 +16,7 @@ import { Property } from "../types/property";
 import * as _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
+import { property } from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -159,8 +160,18 @@ const sortPropertyAssignments = (
 ): ObjectLiteralExpression => {
     const existing = getPropertyAssignments(literal);
     const sorted = sortPropertiesByName<PropertyAssignmentStructure>(existing);
-    existing.forEach((property) => property.remove());
-    literal.addProperties(sorted);
+
+    const propertyOutOfOrder = (
+        existingProperty: PropertyAssignment,
+        index: number
+    ) => existingProperty.getName() !== sorted[index].name;
+
+    const sortProperty = (
+        existingProperty: PropertyAssignment,
+        index: number
+    ) => existingProperty.set(sorted[index]);
+
+    existing.filter(propertyOutOfOrder).forEach(sortProperty);
 
     return literal;
 };

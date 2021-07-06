@@ -1,5 +1,5 @@
 import assert from "assert";
-import { describe, beforeEach } from "mocha";
+import { describe, beforeEach, afterEach } from "mocha";
 import * as kazoo from "../../extension";
 import { TestFixtures, TestUtils } from "../test-utils";
 import { ProjectUtils } from "../../utilities/project-utils";
@@ -26,8 +26,17 @@ suite("kazoo", () => {
 
     const { findPropertyIndexByName } = NodeUtils;
 
+    let translateStub: sinon.SinonStub;
     beforeEach(async () => {
         await TestUtils.resetConfig();
+
+        translateStub = sinon
+            .stub(StringUtils, "translate")
+            .resolves(faker.random.words());
+    });
+
+    afterEach(() => {
+        translateStub.restore();
     });
 
     // #endregion Setup
@@ -253,18 +262,16 @@ suite("kazoo", () => {
             });
 
             whenStrictAlphabetical(() => {
-                test.only("performs full sort of culture file in under 1s", async () => {
+                const expected = 1.25;
+
+                test(`performs full sort of culture file in under ${expected}s`, async () => {
                     // Arrange
-                    const expected = 1;
                     await TestUtils.mergeConfig({
                         insertionPosition: InsertionPosition.StrictAlphabetical,
                     });
                     const start = new Date();
                     const key = faker.random.word();
                     const translation = faker.random.words();
-                    sinon
-                        .stub(StringUtils, "translate")
-                        .resolves(faker.random.words());
 
                     // Act
                     await kazoo.addTranslationToCultureFiles(key, translation);
@@ -274,9 +281,9 @@ suite("kazoo", () => {
                     const elapsedSeconds: number =
                         ((end as any) - (start as any)) / 1000;
                     assert.equal(
-                        elapsedSeconds < expected,
+                        elapsedSeconds <= expected,
                         true,
-                        `Expected ${InsertionPosition.StrictAlphabetical} sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
+                        `Expected '${InsertionPosition.StrictAlphabetical}' sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
                     );
                 });
             });
