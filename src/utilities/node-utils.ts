@@ -12,7 +12,7 @@ import {
     PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
-import { Property } from "../types/property";
+import { Property, PropertyStructure } from "../types/property";
 import * as _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
@@ -160,19 +160,7 @@ const sortPropertyAssignments = (
 ): ObjectLiteralExpression => {
     const existing = getPropertyAssignments(literal);
     const sorted = sortPropertiesByName<PropertyAssignmentStructure>(existing);
-
-    const propertyOutOfOrder = (
-        existingProperty: PropertyAssignment,
-        index: number
-    ) => existingProperty.getName() !== sorted[index].name;
-
-    const sortProperty = (
-        existingProperty: PropertyAssignment,
-        index: number
-    ) => existingProperty.set(sorted[index]);
-
-    existing.filter(propertyOutOfOrder).forEach(sortProperty);
-
+    existing.filter(propertyOutOfOrder(sorted)).forEach(sortProperty(sorted));
     return literal;
 };
 
@@ -181,9 +169,7 @@ const sortPropertySignatures = (
 ): InterfaceDeclaration => {
     const existing = _interface.getProperties();
     const sorted = sortPropertiesByName<PropertySignatureStructure>(existing);
-    existing.forEach((property) => property.remove());
-
-    _interface.addProperties(sorted);
+    existing.filter(propertyOutOfOrder(sorted)).forEach(sortProperty(sorted));
     return _interface;
 };
 
@@ -221,6 +207,22 @@ const shouldQuoteEscapeNewProperty = (
 // -----------------------------------------------------------------------------------------
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
+
+const propertyOutOfOrder = <
+    TProperty extends Property,
+    TPropertyStructure extends PropertyStructure<TProperty>
+>(
+    sorted: TPropertyStructure[]
+) => (existingProperty: TProperty, index: number) =>
+    existingProperty.getName() !== sorted[index].name;
+
+const sortProperty = <
+    TProperty extends Property,
+    TPropertyStructure = PropertyStructure<TProperty>
+>(
+    sorted: Array<TPropertyStructure>
+) => (existingProperty: TProperty, index: number) =>
+    existingProperty.set(sorted[index]);
 
 const trimName = <T extends NamedNodeSpecificBase<Node>>(node: T) =>
     StringUtils.stripQuotes(node.getName());

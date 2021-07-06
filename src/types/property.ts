@@ -10,9 +10,11 @@ import {
 // -----------------------------------------------------------------------------------------
 
 type Property = PropertyAssignment | PropertySignature;
-type PropertyAndStructure =
-    | [PropertyAssignment, PropertyAssignmentStructure]
-    | [PropertySignature, PropertySignatureStructure];
+type PropertyStructure<
+    TProperty extends Property
+> = TProperty extends PropertyAssignment
+    ? PropertyAssignmentStructure
+    : PropertySignatureStructure;
 
 // #endregion Types
 
@@ -20,6 +22,6 @@ type PropertyAndStructure =
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { Property, PropertyAndStructure };
+export { Property, PropertyStructure };
 
 // #endregion Exports

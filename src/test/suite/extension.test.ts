@@ -167,6 +167,46 @@ suite("kazoo", () => {
                 });
             });
         });
+
+        /**
+         * https://github.com/brandongregoryscott/kazoo/issues/17
+         */
+        describe("given interface has 100+ keys", () => {
+            beforeEach(async () => {
+                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.SixHundredKeys
+                );
+                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
+
+                await shouldActivate();
+            });
+
+            whenStrictAlphabetical(() => {
+                const expected = 1.25;
+
+                test.only(`performs full sort of interface in under ${expected}s`, async () => {
+                    // Arrange
+                    await TestUtils.mergeConfig({
+                        insertionPosition: InsertionPosition.StrictAlphabetical,
+                    });
+                    const start = new Date();
+                    const key = faker.random.word().toLowerCase();
+
+                    // Act
+                    await kazoo.addKeyToInterface(key);
+
+                    // Assert
+                    const end = new Date();
+                    const elapsedSeconds: number =
+                        ((end as any) - (start as any)) / 1000;
+                    assert.equal(
+                        elapsedSeconds <= expected,
+                        true,
+                        `Expected '${InsertionPosition.StrictAlphabetical}' sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
+                    );
+                });
+            });
+        });
     });
 
     // #endregion addKeyToInterface
