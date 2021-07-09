@@ -18,6 +18,8 @@ import { Language } from "../../enums/language";
 import faker from "faker";
 import sinon from "sinon";
 import { StringUtils } from "../../utilities/string-utils";
+import { PropertyAssignment, PropertySignature } from "ts-morph";
+import { Property } from "../../types/property";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -38,6 +40,13 @@ suite("kazoo", () => {
     afterEach(() => {
         translateStub.restore();
     });
+
+    const sortProperties = (properties: Property[]) =>
+        [...properties].sort((a, b) =>
+            StringUtils.stripQuotes(a.getName()).localeCompare(
+                StringUtils.stripQuotes(b.getName())
+            )
+        );
 
     // #endregion Setup
 
@@ -71,12 +80,12 @@ suite("kazoo", () => {
                 const cultureInterface = await ProjectUtils.getCultureInterface();
 
                 // Assert
-                assert.equal(result, key);
+                assert.strictEqual(result, key);
                 cultureInterface.getPropertyOrThrow(key);
             });
         });
 
-        describe("given interfaces has alphabetized keys", () => {
+        describe("given interface has alphabetized keys", () => {
             beforeEach(async () => {
                 const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
                     TestFixtures.FiveKeysAlphabetized
@@ -96,11 +105,11 @@ suite("kazoo", () => {
                     const cultureInterface = await ProjectUtils.getCultureInterface();
 
                     // Assert
-                    assert.equal(result, key);
+                    assert.strictEqual(result, key);
                     cultureInterface.getPropertyOrThrow(key);
 
                     const properties = cultureInterface.getProperties();
-                    assert.equal(_.last(properties)?.getName(), key);
+                    assert.strictEqual(_.last(properties)?.getName(), key);
                 });
             });
 
@@ -117,11 +126,11 @@ suite("kazoo", () => {
                     const cultureInterface = await ProjectUtils.getCultureInterface();
 
                     // Assert
-                    assert.equal(result, key);
+                    assert.strictEqual(result, key);
                     cultureInterface.getPropertyOrThrow(key);
 
                     const properties = cultureInterface.getProperties();
-                    assert.equal(_.last(properties)?.getName(), key);
+                    assert.strictEqual(_.last(properties)?.getName(), key);
                 });
             });
 
@@ -138,11 +147,11 @@ suite("kazoo", () => {
                     const cultureInterface = await ProjectUtils.getCultureInterface();
 
                     // Assert
-                    assert.equal(result, key);
+                    assert.strictEqual(result, key);
                     cultureInterface.getPropertyOrThrow(key);
 
                     const properties = cultureInterface.getProperties();
-                    assert.equal(_.first(properties)?.getName(), key);
+                    assert.strictEqual(_.first(properties)?.getName(), key);
                 });
             });
 
@@ -159,11 +168,58 @@ suite("kazoo", () => {
                     const cultureInterface = await ProjectUtils.getCultureInterface();
 
                     // Assert
-                    assert.equal(result, key);
+                    assert.strictEqual(result, key);
                     cultureInterface.getPropertyOrThrow(key);
 
                     const properties = cultureInterface.getProperties();
-                    assert.equal(_.last(properties)?.getName(), key);
+                    assert.strictEqual(_.last(properties)?.getName(), key);
+                });
+            });
+        });
+
+        describe("given interface is not strictly alphabetized", () => {
+            beforeEach(async () => {
+                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.SixHundredKeys
+                );
+                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
+
+                await shouldActivate();
+            });
+
+            whenStrictAlphabetical(() => {
+                test("performs full sort of interface", async () => {
+                    // Arrange
+                    await TestUtils.mergeConfig({
+                        insertionPosition: InsertionPosition.StrictAlphabetical,
+                    });
+                    const key = faker.random.word().toLowerCase();
+
+                    // Act
+                    await kazoo.addKeyToInterface(key);
+                    const properties = await (
+                        await ProjectUtils.getCultureInterface()
+                    ).getProperties();
+
+                    // Assert
+                    const expectedProperties = sortProperties(properties);
+                    const assertPropertySorted = (
+                        property: PropertySignature,
+                        index: number
+                    ) => {
+                        const actual = StringUtils.stripQuotes(
+                            property.getName()
+                        );
+                        const expected = StringUtils.stripQuotes(
+                            expectedProperties[index].getName()
+                        );
+                        assert.strictEqual(
+                            actual,
+                            expected,
+                            `Expected property at index ${index} to be '${expected}', but found '${actual}'`
+                        );
+                    };
+                    properties.forEach(assertPropertySorted);
                 });
             });
         });
@@ -184,7 +240,7 @@ suite("kazoo", () => {
             whenStrictAlphabetical(() => {
                 const expected = 1.25;
 
-                test.only(`performs full sort of interface in under ${expected}s`, async () => {
+                test(`performs full sort of interface in under ${expected}s`, async () => {
                     // Arrange
                     await TestUtils.mergeConfig({
                         insertionPosition: InsertionPosition.StrictAlphabetical,
@@ -199,7 +255,7 @@ suite("kazoo", () => {
                     const end = new Date();
                     const elapsedSeconds: number =
                         ((end as any) - (start as any)) / 1000;
-                    assert.equal(
+                    assert.strictEqual(
                         elapsedSeconds <= expected,
                         true,
                         `Expected '${InsertionPosition.StrictAlphabetical}' sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
@@ -216,6 +272,60 @@ suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
 
     describe("addTranslationToCultureFiles", () => {
+        describe("given culture file is not strictly alphabetized", () => {
+            beforeEach(async () => {
+                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
+                    TestFixtures.SixHundredKeys
+                );
+                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
+
+                await shouldActivate();
+            });
+
+            whenStrictAlphabetical(() => {
+                test("performs full sort of culture file", async () => {
+                    // Arrange
+                    await TestUtils.mergeConfig({
+                        insertionPosition: InsertionPosition.StrictAlphabetical,
+                    });
+                    const key = faker.random.word().toLowerCase();
+                    const translation = faker.random.words();
+
+                    // Act
+                    await kazoo.addTranslationToCultureFiles(key, translation);
+                    const cultureFile = (
+                        await ProjectUtils.getCultureFiles()
+                    )[0];
+                    const resourceObject = SourceFileUtils.getResourcesObject(
+                        cultureFile!
+                    );
+                    const properties = NodeUtils.getPropertyAssignments(
+                        resourceObject!
+                    );
+
+                    // Assert
+                    const expectedProperties = sortProperties(properties);
+                    const assertPropertySorted = (
+                        property: PropertyAssignment,
+                        index: number
+                    ) => {
+                        const actual = StringUtils.stripQuotes(
+                            property.getName()
+                        );
+                        const expected = StringUtils.stripQuotes(
+                            expectedProperties[index].getName()
+                        );
+                        assert.strictEqual(
+                            actual,
+                            expected,
+                            `Expected property at index ${index} to be '${expected}', but found '${actual}'`
+                        );
+                    };
+                    properties.forEach(assertPropertySorted);
+                });
+            });
+        });
+
         /**
          * https://github.com/brandongregoryscott/kazoo/issues/15
          */
@@ -248,7 +358,7 @@ suite("kazoo", () => {
                     );
 
                     // Assert
-                    assert.equal(
+                    assert.strictEqual(
                         result.length,
                         cultureFiles.length,
                         "Expected number of translations to match number of culture files found."
@@ -274,12 +384,12 @@ suite("kazoo", () => {
                         properties
                     );
 
-                    assert.equal(
+                    assert.strictEqual(
                         actualIndex,
                         expectedBeforeIndex - 1,
                         `Expected '${key}' to appear alphabetically before '${expectedBeforeKey}'`
                     );
-                    assert.equal(
+                    assert.strictEqual(
                         actualIndex,
                         expectedAfterIndex + 1,
                         `Expected '${key}' to appear alphabetically after '${expectedAfterKey}'`
@@ -320,7 +430,7 @@ suite("kazoo", () => {
                     const end = new Date();
                     const elapsedSeconds: number =
                         ((end as any) - (start as any)) / 1000;
-                    assert.equal(
+                    assert.strictEqual(
                         elapsedSeconds <= expected,
                         true,
                         `Expected '${InsertionPosition.StrictAlphabetical}' sorting to complete in ${expected}s or less. Actual: ${elapsedSeconds}`
