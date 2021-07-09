@@ -16,7 +16,6 @@ import { Property, PropertyStructure } from "../types/property";
 import * as _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
-import { property } from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -159,30 +158,31 @@ const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existing = getPropertyAssignments(literal);
-    const sorted = sortPropertiesByName<PropertyAssignmentStructure>(existing);
-    existing.filter(propertyOutOfOrder(sorted)).forEach(sortProperty(sorted));
+    const sorted = sortPropertiesByName(existing);
+    // TODO: Update replacement logic for object literal
     return literal;
 };
 
 const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
-    const existing = _interface.getProperties();
-    const sorted = sortPropertiesByName<PropertySignatureStructure>(existing);
-    existing.filter(propertyOutOfOrder(sorted)).forEach(sortProperty(sorted));
+    const existingProperties = _interface.getProperties();
+    const sortedProperties = sortPropertiesByName(existingProperties);
+
+    existingProperties.forEach((existing: PropertySignature) => {
+        const sortedIndex = sortedProperties.findIndex(
+            comparePropertiesByName(existing)
+        );
+
+        if (sortedIndex < 0) {
+            return;
+        }
+
+        existing.setOrder(sortedIndex);
+    });
+
     return _interface;
 };
-
-const sortPropertiesByName = <
-    TPropertyStructure extends
-        | PropertyAssignmentStructure
-        | PropertySignatureStructure
->(
-    properties: Property[]
-) =>
-    properties
-        .sort((a, b) => trimName(a).localeCompare(trimName(b)))
-        .map((property) => property.getStructure() as TPropertyStructure);
 
 const shouldQuoteEscapeNewProperty = (
     name: string,
@@ -208,24 +208,13 @@ const shouldQuoteEscapeNewProperty = (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const propertyOutOfOrder = <
-    TProperty extends Property,
-    TPropertyStructure extends PropertyStructure<TProperty>
->(
-    sorted: TPropertyStructure[]
-) => (existingProperty: TProperty, index: number) =>
-    existingProperty.getName() !== sorted[index].name;
+const comparePropertiesByName = (a: Property) => (b: Property): number =>
+    StringUtils.stripQuotes(a.getName()).localeCompare(
+        StringUtils.stripQuotes(b.getName())
+    );
 
-const sortProperty = <
-    TProperty extends Property,
-    TPropertyStructure = PropertyStructure<TProperty>
->(
-    sorted: Array<TPropertyStructure>
-) => (existingProperty: TProperty, index: number) =>
-    existingProperty.set(sorted[index]);
-
-const trimName = <T extends NamedNodeSpecificBase<Node>>(node: T) =>
-    StringUtils.stripQuotes(node.getName());
+const sortPropertiesByName = (properties: Property[]): Property[] =>
+    properties.sort((a, b) => comparePropertiesByName(a)(b));
 
 // #endregion Private Functions
 
