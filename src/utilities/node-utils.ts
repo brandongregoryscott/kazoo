@@ -1,7 +1,6 @@
 import {
     Identifier,
     InterfaceDeclaration,
-    NamedNodeSpecificBase,
     Node,
     ObjectLiteralElementLike,
     ObjectLiteralExpression,
@@ -9,11 +8,10 @@ import {
     PropertyAssignment,
     PropertyAssignmentStructure,
     PropertySignature,
-    PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
-import { Property, PropertyStructure } from "../types/property";
-import * as _ from "lodash";
+import { Property } from "../types/property";
+import _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 
@@ -157,9 +155,12 @@ const updateProperties = (
 const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
-    const existing = getPropertyAssignments(literal);
-    const sorted = sortPropertiesByName(existing);
-    // TODO: Update replacement logic for object literal
+    const existingProperties = getPropertyAssignments(literal);
+    const sortedProperties = sortPropertiesByName<PropertyAssignment>(
+        existingProperties
+    ).map((property) => property.getStructure());
+    existingProperties.forEach((existing) => existing.remove());
+    literal.addPropertyAssignments(sortedProperties);
     return literal;
 };
 
@@ -167,11 +168,13 @@ const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
     const existingProperties = _interface.getProperties();
-    const sortedProperties = sortPropertiesByName(existingProperties);
+    const sortedProperties = sortPropertiesByName<PropertySignature>(
+        existingProperties
+    );
 
     existingProperties.forEach((existing: PropertySignature) => {
         const sortedIndex = sortedProperties.findIndex(
-            comparePropertiesByName(existing)
+            comparePropertyByName(existing)
         );
 
         if (sortedIndex < 0) {
@@ -208,13 +211,18 @@ const shouldQuoteEscapeNewProperty = (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const comparePropertiesByName = (a: Property) => (b: Property): number =>
-    StringUtils.stripQuotes(a.getName()).localeCompare(
-        StringUtils.stripQuotes(b.getName())
-    );
+const comparePropertyByName = (a: Property) => (b: Property) =>
+    StringUtils.stripQuotes(a.getName()) ===
+    StringUtils.stripQuotes(b.getName());
 
-const sortPropertiesByName = (properties: Property[]): Property[] =>
-    properties.sort((a, b) => comparePropertiesByName(a)(b));
+const sortPropertiesByName = <TProperty extends Property = Property>(
+    properties: Property[]
+): TProperty[] =>
+    properties.sort((a, b) =>
+        StringUtils.stripQuotes(a.getName()).localeCompare(
+            StringUtils.stripQuotes(b.getName())
+        )
+    ) as TProperty[];
 
 // #endregion Private Functions
 
