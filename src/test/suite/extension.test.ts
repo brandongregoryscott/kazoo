@@ -20,6 +20,7 @@ import sinon from "sinon";
 import { StringUtils } from "../../utilities/string-utils";
 import { PropertyAssignment, PropertySignature } from "ts-morph";
 import { Property } from "../../types/property";
+import { useFixture } from "../shared/hooks";
 
 suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
@@ -35,6 +36,8 @@ suite("kazoo", () => {
         translateStub = sinon
             .stub(StringUtils, "translate")
             .resolves(faker.random.words());
+
+        await shouldActivate();
     });
 
     afterEach(() => {
@@ -57,19 +60,8 @@ suite("kazoo", () => {
     // -----------------------------------------------------------------------------------------
 
     describe("addKeyToInterface", () => {
-        beforeEach(() => {
-            TestUtils.cleanTmpDirectory();
-        });
-
         describe("given interface is empty", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.Empty
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.Empty);
 
             test("inserts key into interface, returns created key", async () => {
                 // Arrange
@@ -86,14 +78,7 @@ suite("kazoo", () => {
         });
 
         describe("given interface has alphabetized keys", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.FiveKeysAlphabetized
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.FiveKeysAlphabetized);
 
             whenLooseAlphabetical(() => {
                 test("inserts key into interface at expected position, returns created key", async () => {
@@ -117,9 +102,6 @@ suite("kazoo", () => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.StrictAlphabetical,
-                    });
 
                     // Act
                     const result = await kazoo.addKeyToInterface(key);
@@ -138,9 +120,6 @@ suite("kazoo", () => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.Start,
-                    });
 
                     // Act
                     const result = await kazoo.addKeyToInterface(key);
@@ -159,9 +138,6 @@ suite("kazoo", () => {
                 test("inserts key into interface at expected position, returns created key", async () => {
                     // Arrange
                     const key = "testKey";
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.End,
-                    });
 
                     // Act
                     const result = await kazoo.addKeyToInterface(key);
@@ -178,21 +154,11 @@ suite("kazoo", () => {
         });
 
         describe("given interface is not strictly alphabetized", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.SixHundredKeys
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.SixHundredKeys);
 
             whenStrictAlphabetical(() => {
                 test("performs full sort of interface", async () => {
                     // Arrange
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.StrictAlphabetical,
-                    });
                     const key = faker.random.word().toLowerCase();
 
                     // Act
@@ -228,23 +194,13 @@ suite("kazoo", () => {
          * https://github.com/brandongregoryscott/kazoo/issues/17
          */
         describe("given interface has 100+ keys", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.SixHundredKeys
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.SixHundredKeys);
 
             whenStrictAlphabetical(() => {
                 const expected = 1.25;
 
                 test(`performs full sort of interface in under ${expected}s`, async () => {
                     // Arrange
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.StrictAlphabetical,
-                    });
                     const start = new Date();
                     const key = faker.random.word().toLowerCase();
 
@@ -273,21 +229,11 @@ suite("kazoo", () => {
 
     describe("addTranslationToCultureFiles", () => {
         describe("given culture file is not strictly alphabetized", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.SixHundredKeys
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.SixHundredKeys);
 
             whenStrictAlphabetical(() => {
                 test("performs full sort of culture file", async () => {
                     // Arrange
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.StrictAlphabetical,
-                    });
                     const key = faker.random.word().toLowerCase();
                     const translation = faker.random.words();
 
@@ -330,14 +276,7 @@ suite("kazoo", () => {
          * https://github.com/brandongregoryscott/kazoo/issues/15
          */
         describe("given culture file has spread assignment in object literal", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.Issue15
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.Issue15);
 
             whenLooseAlphabetical(() => {
                 test("inserts translation into culture file at expected position, returns list of translations", async () => {
@@ -402,23 +341,13 @@ suite("kazoo", () => {
          * https://github.com/brandongregoryscott/kazoo/issues/17
          */
         describe("given culture file has 100+ entries", () => {
-            beforeEach(async () => {
-                const tmpDirectory = TestUtils.copyFixturesToTmpDirectory(
-                    TestFixtures.SixHundredKeys
-                );
-                await TestUtils.mergeConfigForTmpDirectory(tmpDirectory);
-
-                await shouldActivate();
-            });
+            useFixture(TestFixtures.SixHundredKeys);
 
             whenStrictAlphabetical(() => {
                 const expected = 1.25;
 
                 test.skip(`performs full sort of culture file in under ${expected}s`, async () => {
                     // Arrange
-                    await TestUtils.mergeConfig({
-                        insertionPosition: InsertionPosition.StrictAlphabetical,
-                    });
                     const start = new Date();
                     const key = faker.random.word();
                     const translation = faker.random.words();

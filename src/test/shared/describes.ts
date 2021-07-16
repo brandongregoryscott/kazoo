@@ -1,20 +1,21 @@
 import { InsertionPosition } from "../../enums/insertion-position";
-import { Suite, describe } from "mocha";
+import { beforeEach, describe } from "mocha";
+import { TestUtils } from "../test-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const whenEndPosition = (fn: (this: Suite) => void) =>
+const whenEndPosition = (fn: () => void) =>
     whenInsertionPosition(InsertionPosition.End)(fn);
 
-const whenLooseAlphabetical = (fn: (this: Suite) => void) =>
+const whenLooseAlphabetical = (fn: () => void) =>
     whenInsertionPosition(InsertionPosition.LooseAlphabetical)(fn);
 
-const whenStartPosition = (fn: (this: Suite) => void) =>
+const whenStartPosition = (fn: () => void) =>
     whenInsertionPosition(InsertionPosition.Start)(fn);
 
-const whenStrictAlphabetical = (fn: (this: Suite) => void) =>
+const whenStrictAlphabetical = (fn: () => void) =>
     whenInsertionPosition(InsertionPosition.StrictAlphabetical)(fn);
 
 // #endregion Public Functions
@@ -24,8 +25,17 @@ const whenStrictAlphabetical = (fn: (this: Suite) => void) =>
 // -----------------------------------------------------------------------------------------
 
 const whenInsertionPosition = (insertionPosition: InsertionPosition) => (
-    fn: (this: Suite) => void
-) => describe(`when insertionPosition '${insertionPosition}'`, fn);
+    fn: () => void
+) =>
+    describe(`when insertionPosition '${insertionPosition}'`, () => {
+        beforeEach(async () => {
+            await TestUtils.mergeConfig({
+                insertionPosition,
+            });
+        });
+
+        fn();
+    });
 
 // #endregion Private Functions
 
