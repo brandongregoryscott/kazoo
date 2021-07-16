@@ -1,7 +1,6 @@
 import {
     Identifier,
     InterfaceDeclaration,
-    NamedNodeSpecificBase,
     Node,
     ObjectLiteralElementLike,
     ObjectLiteralExpression,
@@ -9,11 +8,10 @@ import {
     PropertyAssignment,
     PropertyAssignmentStructure,
     PropertySignature,
-    PropertySignatureStructure,
 } from "ts-morph";
 import { InsertionPosition } from "../enums/insertion-position";
 import { Property } from "../types/property";
-import * as _ from "lodash";
+import _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 
@@ -157,35 +155,37 @@ const updateProperties = (
 const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
-    const existing = getPropertyAssignments(literal);
-    const sorted = sortPropertiesByName<PropertyAssignmentStructure>(existing);
-    existing.forEach((property) => property.remove());
-    literal.addProperties(sorted);
-
+    const existingProperties = getPropertyAssignments(literal);
+    const sortedProperties = sortPropertiesByName<PropertyAssignment>(
+        existingProperties
+    ).map((property) => property.getStructure());
+    existingProperties.forEach((existing) => existing.remove());
+    literal.addPropertyAssignments(sortedProperties);
     return literal;
 };
 
 const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
-    const existing = _interface.getProperties();
-    const sorted = sortPropertiesByName<PropertySignatureStructure>(existing);
-    existing.forEach((property) => property.remove());
+    const existingProperties = _interface.getProperties();
+    const sortedProperties = sortPropertiesByName<PropertySignature>(
+        existingProperties
+    );
 
-    _interface.addProperties(sorted);
+    existingProperties.forEach((existing: PropertySignature) => {
+        const sortedIndex = sortedProperties.findIndex(
+            comparePropertyByName(existing)
+        );
+
+        if (sortedIndex < 0) {
+            return;
+        }
+
+        existing.setOrder(sortedIndex);
+    });
+
     return _interface;
 };
-
-const sortPropertiesByName = <
-    TPropertyStructure extends
-        | PropertyAssignmentStructure
-        | PropertySignatureStructure
->(
-    properties: Property[]
-) =>
-    properties
-        .sort((a, b) => trimName(a).localeCompare(trimName(b)))
-        .map((property) => property.getStructure() as TPropertyStructure);
 
 const shouldQuoteEscapeNewProperty = (
     name: string,
@@ -211,8 +211,18 @@ const shouldQuoteEscapeNewProperty = (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-const trimName = <T extends NamedNodeSpecificBase<Node>>(node: T) =>
-    StringUtils.stripQuotes(node.getName());
+const comparePropertyByName = (a: Property) => (b: Property) =>
+    StringUtils.stripQuotes(a.getName()) ===
+    StringUtils.stripQuotes(b.getName());
+
+const sortPropertiesByName = <TProperty extends Property = Property>(
+    properties: Property[]
+): TProperty[] =>
+    properties.sort((a, b) =>
+        StringUtils.stripQuotes(a.getName()).localeCompare(
+            StringUtils.stripQuotes(b.getName())
+        )
+    ) as TProperty[];
 
 // #endregion Private Functions
 

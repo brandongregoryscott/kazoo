@@ -14,7 +14,7 @@ const shouldActivate = async () => {
     await extension?.activate();
 
     // Assert
-    assert.equal(extension?.isActive, true);
+    assert.strictEqual(extension?.isActive, true);
 };
 
 // #endregion Public Functions

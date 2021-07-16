@@ -135,14 +135,14 @@ const _buildNewProperty = async (
     }
 
     try {
-        const translationResult = await translate(value, {
+        const translation = await StringUtils.translate(value, {
             from: LanguageCode.Default,
             to: matchedLanguage,
         });
 
         const translatedProperty = {
             ...property,
-            initializer: StringUtils.quoteEscape(translationResult.text),
+            initializer: StringUtils.quoteEscape(translation),
         };
         return translatedProperty;
     } catch (error) {

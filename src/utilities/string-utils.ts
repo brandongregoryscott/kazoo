@@ -2,6 +2,9 @@ import { LanguageCodeMap } from "../constants/language-code-map";
 import { Language } from "../enums/language";
 import { Property } from "../types/property";
 import { NodeUtils } from "./node-utils";
+import translate, {
+    IOptions as TranslateOptions,
+} from "@vitalets/google-translate-api";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -41,6 +44,13 @@ const StringUtils = {
     },
     stripQuotes(value: string): string {
         return value.replace(/["']/g, "");
+    },
+    async translate(
+        value: string,
+        options?: TranslateOptions
+    ): Promise<string> {
+        const { text } = await translate(value, options);
+        return text;
     },
 };
 
