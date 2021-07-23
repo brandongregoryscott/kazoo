@@ -1,12 +1,6 @@
 import { WindowUtils } from "../utilities/window-utils";
-import * as vscode from "vscode";
 import { ProjectUtils } from "../utilities/project-utils";
-import { InterfaceDeclaration } from "ts-morph";
 import { NodeUtils } from "../utilities/node-utils";
-import { ConfigUtils } from "../utilities/config-utils";
-import { StringUtils } from "../utilities/string-utils";
-import { Property } from "../types/property";
-import { InsertionPosition } from "../enums/insertion-position";
 import { CoreUtils } from "../utilities/core-utils";
 import { log } from "../utilities/log";
 import { Commands } from "../constants/commands";

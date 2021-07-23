@@ -7,6 +7,8 @@ const Commands = {
     addKeyAndTranslation: "kazoo.addKeyAndTranslation",
     addTranslationToCultureFiles: "kazoo.addTranslationToCultureFiles",
     removeKeyFromInterface: "kazoo.removeKeyFromInterface",
+    removeTranslationFromCultureFiles:
+        "kazoo.removeTranslationFromCultureFiles",
     replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
 };
 
