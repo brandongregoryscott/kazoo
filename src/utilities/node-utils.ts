@@ -14,6 +14,7 @@ import { Property } from "../types/property";
 import _ from "lodash";
 import { StringUtils } from "./string-utils";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
+import { PropertyUtils } from "./property-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -147,8 +148,8 @@ const updateProperties = (
 
     return {
         notFound: notFoundProperties.map((property) => property.name),
-        unmodified: unmodifiedProperties.map((property) => property.getName()),
-        updated: propertiesToUpdate.map((property) => property.getName()),
+        unmodified: PropertyUtils.getNames(unmodifiedProperties),
+        updated: PropertyUtils.getNames(propertiesToUpdate),
     };
 };
 
@@ -156,7 +157,7 @@ const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existingProperties = getPropertyAssignments(literal);
-    const sortedProperties = sortPropertiesByName<PropertyAssignment>(
+    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertyAssignment>(
         existingProperties
     ).map((property) => property.getStructure());
     existingProperties.forEach((existing) => existing.remove());
@@ -168,13 +169,13 @@ const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
     const existingProperties = _interface.getProperties();
-    const sortedProperties = sortPropertiesByName<PropertySignature>(
+    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertySignature>(
         existingProperties
     );
 
     existingProperties.forEach((existing: PropertySignature) => {
         const sortedIndex = sortedProperties.findIndex(
-            comparePropertyByName(existing)
+            PropertyUtils.comparePropertyByName(existing)
         );
 
         if (sortedIndex < 0) {
@@ -208,25 +209,6 @@ const shouldQuoteEscapeNewProperty = (
 // #endregion Public Functions
 
 // -----------------------------------------------------------------------------------------
-// #region Private Functions
-// -----------------------------------------------------------------------------------------
-
-const comparePropertyByName = (a: Property) => (b: Property) =>
-    StringUtils.stripQuotes(a.getName()) ===
-    StringUtils.stripQuotes(b.getName());
-
-const sortPropertiesByName = <TProperty extends Property = Property>(
-    properties: Property[]
-): TProperty[] =>
-    properties.sort((a, b) =>
-        StringUtils.stripQuotes(a.getName()).localeCompare(
-            StringUtils.stripQuotes(b.getName())
-        )
-    ) as TProperty[];
-
-// #endregion Private Functions
-
-// -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
@@ -241,7 +223,6 @@ export const NodeUtils = {
     isObjectLiteralExpressionWithProperty,
     mapToPropertyAssignments,
     shouldQuoteEscapeNewProperty,
-    sortPropertiesByName,
     sortPropertyAssignments,
     sortPropertySignatures,
     updateProperties,
