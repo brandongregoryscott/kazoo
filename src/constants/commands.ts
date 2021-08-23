@@ -9,6 +9,7 @@ const Commands = {
     removeKeyFromInterface: "kazoo.removeKeyFromInterface",
     removeTranslationFromCultureFiles:
         "kazoo.removeTranslationFromCultureFiles",
+    replaceTranslationByKey: "kazoo.replaceTranslationByKey",
     replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
 };
 

@@ -3,6 +3,7 @@ import { addKeyToInterface } from "../commands/add-key-to-interface";
 import { addTranslationToCultureFiles } from "../commands/add-translation-to-culture-files";
 import { removeKeyFromInterface } from "../commands/remove-key-from-interface";
 import { removeTranslationFromCultureFiles } from "../commands/remove-translation-from-culture-files";
+import { replaceTranslationByKey } from "../commands/replace-translation-by-key";
 import { replaceTranslationsFromFile } from "../commands/replace-translations-from-file";
 import { Commands } from "./commands";
 
@@ -16,6 +17,7 @@ const CommandMap: Record<string, (...args: any[]) => any> = {
     [Commands.addTranslationToCultureFiles]: addTranslationToCultureFiles,
     [Commands.removeKeyFromInterface]: removeKeyFromInterface,
     [Commands.removeTranslationFromCultureFiles]: removeTranslationFromCultureFiles,
+    [Commands.replaceTranslationByKey]: replaceTranslationByKey,
     [Commands.replaceTranslationsFromFile]: replaceTranslationsFromFile,
 };
 

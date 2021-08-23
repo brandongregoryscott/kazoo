@@ -43,6 +43,16 @@ const WindowUtils = {
             ignoreFocusOut: true,
         });
     },
+    prefilledPrompt(
+        prompt: string,
+        value: string
+    ): Thenable<string | undefined> {
+        return vscode.window.showInputBox({
+            prompt,
+            value,
+            ignoreFocusOut: true,
+        });
+    },
     selection(options: string[]): Thenable<string | undefined> {
         return vscode.window.showQuickPick(options, {
             ignoreFocusOut: true,
