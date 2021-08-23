@@ -79,7 +79,14 @@ const replaceTranslationByKey = async (
             propertyAssignments
         );
         if (property == null) {
-            log.warn("Could not find translation for key", key, resources);
+            log.warn(
+                "Could not find translation for key",
+                key,
+                cultureFilePath
+            );
+            WindowUtils.warning(
+                `Could not find translation for key '${key}' in ${cultureFile.getBaseName()}`
+            );
             return;
         }
 
