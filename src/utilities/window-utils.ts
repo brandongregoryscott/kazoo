@@ -37,14 +37,28 @@ const WindowUtils = {
     info(value: string, ...options: MessageOption[]): void {
         showMessage(vscode.window.showInformationMessage)(value, ...options);
     },
+    prefilledPrompt(
+        prompt: string,
+        value: string
+    ): Thenable<string | undefined> {
+        return vscode.window.showInputBox({
+            prompt,
+            value,
+            ignoreFocusOut: true,
+        });
+    },
     prompt(prompt: string): Thenable<string | undefined> {
         return vscode.window.showInputBox({
             prompt,
             ignoreFocusOut: true,
         });
     },
-    selection(options: string[]): Thenable<string | undefined> {
+    selection(
+        options: string[],
+        placeHolder?: string
+    ): Thenable<string | undefined> {
         return vscode.window.showQuickPick(options, {
+            placeHolder,
             ignoreFocusOut: true,
         });
     },

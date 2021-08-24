@@ -5,6 +5,7 @@
         "onCommand:kazoo.addTranslationToCultureFiles",
         "onCommand:kazoo.removeKeyFromInterface",
         "onCommand:kazoo.removeTranslationFromCultureFiles",
+        "onCommand:kazoo.replaceTranslationByKey",
         "onCommand:kazoo.replaceTranslationsFromFile"
     ],
     "author": {
@@ -40,6 +41,11 @@
                 "category": "kazoo",
                 "command": "kazoo.removeTranslationFromCultureFiles",
                 "title": "Remove translation from culture files"
+            },
+            {
+                "category": "kazoo",
+                "command": "kazoo.replaceTranslationByKey",
+                "title": "Replace translation for a specific key"
             },
             {
                 "category": "kazoo",

@@ -83,7 +83,9 @@ const isObjectLiteralExpressionWithProperty = (
     node: Node,
     property: string
 ): node is ObjectLiteralExpression =>
-    Node.isObjectLiteralExpression(node) && node.getProperty(property) != null;
+    Node.isObjectLiteralExpression(node) &&
+    (node.getProperty(property) != null ||
+        node.getProperty(StringUtils.quoteEscape(property)) != null);
 
 const mapToPropertyAssignments = (
     object: Record<string, string>,
