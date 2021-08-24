@@ -5,9 +5,10 @@ import { CoreUtils } from "../utilities/core-utils";
 import { log } from "../utilities/log";
 import { Commands } from "../constants/commands";
 import { PropertyUtils } from "../utilities/property-utils";
-import { PropertyAssignment } from "ts-morph";
+import { PropertyAssignment, SyntaxKind } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { StringUtils } from "../utilities/string-utils";
+import { SharedConstants } from "../constants/shared-constants";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -18,7 +19,6 @@ const replaceTranslationByKey = async (
     cultureFilePath?: string
 ) => {
     try {
-        const cultureInterfaceFile = await ProjectUtils.getCultureInterfaceFile();
         const cultureInterface = await ProjectUtils.getCultureInterface();
         const interfaceName = cultureInterface.getName();
         const interfaceProperties = cultureInterface.getProperties();
@@ -71,13 +71,24 @@ const replaceTranslationByKey = async (
         }
 
         const resources = SourceFileUtils.getResourcesObject(cultureFile);
-        const propertyAssignments = NodeUtils.getPropertyAssignments(
-            resources!
+        if (resources == null) {
+            WindowUtils.errorResourcesNotFound(cultureFile);
+            return;
+        }
+        const objectLiteralWithProperty = NodeUtils.findObjectLiteralExpressionWithProperty(
+            cultureFile.getDescendants(),
+            key
         );
+
+        const propertyAssignments = NodeUtils.getPropertyAssignments(
+            objectLiteralWithProperty ?? resources
+        );
+
         const property = NodeUtils.findPropertyByName<PropertyAssignment>(
             key,
             propertyAssignments
         );
+
         if (property == null) {
             log.warn(
                 "Could not find translation for key",
@@ -106,8 +117,19 @@ const replaceTranslationByKey = async (
             return;
         }
 
+        // const copyUpdatedOutsideOfResourcesObject =
+        //     objectLiteralWithProperty != null &&
+        //     objectLiteralWithProperty !== resources;
+        // if (copyUpdatedOutsideOfResourcesObject) {
+        //     await WindowUtils.prompt(
+        //         `Would you like to move this copy to the inline '${SharedConstants.RESOURCES}' object?`
+        //     );
+        // }
+
         property.setInitializer(StringUtils.quoteEscape(updatedCopy));
         await cultureFile.save();
+
+        WindowUtils.info(`Successfully updated '${key}' in ${interfaceName}!`);
     } catch (error) {
         CoreUtils.catch("replaceTranslationByKey", error);
     }

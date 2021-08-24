@@ -37,12 +37,6 @@ const WindowUtils = {
     info(value: string, ...options: MessageOption[]): void {
         showMessage(vscode.window.showInformationMessage)(value, ...options);
     },
-    prompt(prompt: string): Thenable<string | undefined> {
-        return vscode.window.showInputBox({
-            prompt,
-            ignoreFocusOut: true,
-        });
-    },
     prefilledPrompt(
         prompt: string,
         value: string
@@ -50,6 +44,12 @@ const WindowUtils = {
         return vscode.window.showInputBox({
             prompt,
             value,
+            ignoreFocusOut: true,
+        });
+    },
+    prompt(prompt: string): Thenable<string | undefined> {
+        return vscode.window.showInputBox({
+            prompt,
             ignoreFocusOut: true,
         });
     },
