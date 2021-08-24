@@ -53,8 +53,12 @@ const WindowUtils = {
             ignoreFocusOut: true,
         });
     },
-    selection(options: string[]): Thenable<string | undefined> {
+    selection(
+        options: string[],
+        placeHolder?: string
+    ): Thenable<string | undefined> {
         return vscode.window.showQuickPick(options, {
+            placeHolder,
             ignoreFocusOut: true,
         });
     },

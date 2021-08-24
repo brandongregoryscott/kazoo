@@ -5,10 +5,11 @@ import { CoreUtils } from "../utilities/core-utils";
 import { log } from "../utilities/log";
 import { Commands } from "../constants/commands";
 import { PropertyUtils } from "../utilities/property-utils";
-import { PropertyAssignment, SyntaxKind } from "ts-morph";
+import { ObjectLiteralExpression, PropertyAssignment } from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { StringUtils } from "../utilities/string-utils";
 import { SharedConstants } from "../constants/shared-constants";
+import { ConfigUtils } from "../utilities/config-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -24,7 +25,10 @@ const replaceTranslationByKey = async (
         const interfaceProperties = cultureInterface.getProperties();
         const propertyNames = PropertyUtils.getNames(interfaceProperties);
         if (key == null) {
-            key = await WindowUtils.selection(propertyNames);
+            key = await WindowUtils.selection(
+                propertyNames,
+                "Select a key to update copy for"
+            );
         }
 
         if (key == null) {
@@ -117,25 +121,71 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        // const copyUpdatedOutsideOfResourcesObject =
-        //     objectLiteralWithProperty != null &&
-        //     objectLiteralWithProperty !== resources;
-        // if (copyUpdatedOutsideOfResourcesObject) {
-        //     await WindowUtils.prompt(
-        //         `Would you like to move this copy to the inline '${SharedConstants.RESOURCES}' object?`
-        //     );
-        // }
-
         property.setInitializer(StringUtils.quoteEscape(updatedCopy));
+
+        await movePropertyIfRequested(
+            objectLiteralWithProperty ?? resources,
+            resources,
+            property
+        );
+
         await cultureFile.save();
 
-        WindowUtils.info(`Successfully updated '${key}' in ${interfaceName}!`);
+        WindowUtils.info(
+            `Successfully updated '${key}' in ${cultureFile.getBaseName()}!`
+        );
     } catch (error) {
         CoreUtils.catch("replaceTranslationByKey", error);
     }
 };
 
 // #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const movePropertyIfRequested = async (
+    objectLiteral: ObjectLiteralExpression,
+    resources: ObjectLiteralExpression,
+    property: PropertyAssignment
+) => {
+    const key = StringUtils.stripQuotes(property.getName());
+
+    const copyUpdatedOutsideOfResourcesObject =
+        objectLiteral != null && objectLiteral !== resources;
+
+    if (!copyUpdatedOutsideOfResourcesObject) {
+        return;
+    }
+
+    const answer = await WindowUtils.selection(
+        [
+            `Yes, move '${key}' to the '${SharedConstants.RESOURCES}' object`,
+            `No, keep '${key}' where it is`,
+        ],
+        `Move this copy to the inline '${SharedConstants.RESOURCES}' object?`
+    );
+
+    if (answer == null || !answer.includes("Yes")) {
+        return;
+    }
+
+    // Clone the property, remove it from the original object, and insert it into the 'resources' object
+    const propertyStructure = property.getStructure();
+    property.remove();
+
+    const { insertionPosition } = ConfigUtils.get();
+
+    const index = NodeUtils.findIndex(
+        insertionPosition,
+        key,
+        resources.getProperties()
+    );
+    resources.insertPropertyAssignment(index, propertyStructure);
+};
+
+// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
