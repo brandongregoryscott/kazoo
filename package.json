@@ -159,5 +159,5 @@
         "vscode:publish": "npm run vscode:pack && vsce publish",
         "watch": "npm run esbuild -- --sourcemap --watch"
     },
-    "version": "0.2.3"
+    "version": "0.3.0"
 }
