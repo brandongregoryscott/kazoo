@@ -1,6 +1,7 @@
 import { addKeyAndTranslation } from "../commands/add-key-and-translation";
 import { addKeyToInterface } from "../commands/add-key-to-interface";
 import { addTranslationToCultureFiles } from "../commands/add-translation-to-culture-files";
+import { intersectUntranslatedKeys } from "../commands/intersect-untranslated-keys";
 import { removeKeyFromInterface } from "../commands/remove-key-from-interface";
 import { removeTranslationFromCultureFiles } from "../commands/remove-translation-from-culture-files";
 import { replaceTranslationByKey } from "../commands/replace-translation-by-key";
@@ -15,6 +16,7 @@ const CommandMap: Record<string, (...args: any[]) => any> = {
     [Commands.addKeyAndTranslation]: addKeyAndTranslation,
     [Commands.addKeyToInterface]: addKeyToInterface,
     [Commands.addTranslationToCultureFiles]: addTranslationToCultureFiles,
+    [Commands.intersectUntranslatedKeys]: intersectUntranslatedKeys,
     [Commands.removeKeyFromInterface]: removeKeyFromInterface,
     [Commands.removeTranslationFromCultureFiles]: removeTranslationFromCultureFiles,
     [Commands.replaceTranslationByKey]: replaceTranslationByKey,

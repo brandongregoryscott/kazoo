@@ -1,16 +1,26 @@
 // -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const kazooDot = (command: string): string => `kazoo.${command}`;
+
+// #endregion Private Functions
+
+// -----------------------------------------------------------------------------------------
 // #region Constants
 // -----------------------------------------------------------------------------------------
 
 const Commands = {
-    addKeyToInterface: "kazoo.addKeyToInterface",
-    addKeyAndTranslation: "kazoo.addKeyAndTranslation",
-    addTranslationToCultureFiles: "kazoo.addTranslationToCultureFiles",
-    removeKeyFromInterface: "kazoo.removeKeyFromInterface",
-    removeTranslationFromCultureFiles:
-        "kazoo.removeTranslationFromCultureFiles",
-    replaceTranslationByKey: "kazoo.replaceTranslationByKey",
-    replaceTranslationsFromFile: "kazoo.replaceTranslationsFromFile",
+    addKeyToInterface: kazooDot("addKeyToInterface"),
+    addKeyAndTranslation: kazooDot("addKeyAndTranslation"),
+    addTranslationToCultureFiles: kazooDot("addTranslationToCultureFiles"),
+    intersectUntranslatedKeys: kazooDot("intersectUntranslatedKeys"),
+    removeKeyFromInterface: kazooDot("removeKeyFromInterface"),
+    removeTranslationFromCultureFiles: kazooDot(
+        "removeTranslationFromCultureFiles"
+    ),
+    replaceTranslationByKey: kazooDot("replaceTranslationByKey"),
+    replaceTranslationsFromFile: kazooDot("replaceTranslationsFromFile"),
 };
 
 // #endregion Constants

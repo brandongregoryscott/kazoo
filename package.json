@@ -3,6 +3,7 @@
         "onCommand:kazoo.addKeyAndTranslation",
         "onCommand:kazoo.addKeyToInterface",
         "onCommand:kazoo.addTranslationToCultureFiles",
+        "onCommand:kazoo.intersectUntranslatedKeys",
         "onCommand:kazoo.removeKeyFromInterface",
         "onCommand:kazoo.removeTranslationFromCultureFiles",
         "onCommand:kazoo.replaceTranslationByKey",
@@ -31,6 +32,11 @@
                 "category": "kazoo",
                 "command": "kazoo.addTranslationToCultureFiles",
                 "title": "Add translation to culture files"
+            },
+            {
+                "category": "kazoo",
+                "command": "kazoo.intersectUntranslatedKeys",
+                "title": "Intersect untranslated keys with English translations"
             },
             {
                 "category": "kazoo",
@@ -147,7 +153,7 @@
         "build:dist": "npm run esbuild -- --minify",
         "build:test": "tsc --pretty",
         "clean": "rimraf dist tmp **/tmp/* **/*.txt **/*.log",
-        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
+        "esbuild": "node ./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
         "lint": "eslint src --ext ts",
         "postvscode:publish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
