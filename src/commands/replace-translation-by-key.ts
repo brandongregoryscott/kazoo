@@ -61,8 +61,9 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        const cultureFile = cultureFiles.find(
-            (file) => file.getFilePath() === cultureFilePath
+        const cultureFile = SourceFileUtils.findByFilePath(
+            cultureFiles,
+            cultureFilePath
         );
 
         if (cultureFile == null) {

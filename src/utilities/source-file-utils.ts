@@ -6,25 +6,49 @@ import {
     SyntaxKind,
 } from "ts-morph";
 import { SharedConstants } from "../constants/shared-constants";
+import { LanguageCode } from "../enums/language-code";
 import { NodeUtils } from "./node-utils";
+import { StringUtils } from "./string-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
 const SourceFileUtils = {
+    filterByNonEnglish(files: Array<SourceFile>): Array<SourceFile> {
+        return files.filter((file) => {
+            const languageCode = SourceFileUtils.getLanguageCode(file);
+
+            if (languageCode == null || languageCode === LanguageCode.Default) {
+                return false;
+            }
+
+            return true;
+        });
+    },
+
+    findByFilePath(
+        files: Array<SourceFile>,
+        filePath: string
+    ): SourceFile | undefined {
+        return files.find((file) => file.getFilePath() === filePath);
+    },
+
+    getLanguageCode(file: SourceFile): string | undefined {
+        return StringUtils.matchLanguageCode(
+            SourceFileUtils.getLanguageIdentifier(file)?.getText()
+        );
+    },
+
     /**
      * Returns the base language object from a given source file. Assumes the `SourceFile` is in the
      * expected structure.
      *
      * @see https://github.com/brandongregoryscott/kazoo#requirements
      */
-    getBaseLanguage(file: SourceFile): Identifier | undefined {
+    getLanguageIdentifier(file: SourceFile): Identifier | undefined {
         const initializerArgs = _getInitializerArgs(file);
-
-        const baseLanguage = NodeUtils.findIdentifier(initializerArgs);
-
-        return baseLanguage;
+        return NodeUtils.findIdentifier(initializerArgs);
     },
 
     /**
