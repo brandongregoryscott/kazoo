@@ -5,6 +5,7 @@ import { NodeUtils } from "./node-utils";
 import translate, {
     IOptions as TranslateOptions,
 } from "@vitalets/google-translate-api";
+import { LanguageCode } from "../enums/language-code";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -14,15 +15,21 @@ const StringUtils = {
     isJsonFile(fileName: string): boolean {
         return fileName.endsWith(".json");
     },
-    matchLanguageCode(variableName?: string): string | undefined {
+    matchLanguageCode(variableName?: string): LanguageCode | undefined {
         if (variableName == null) {
             return undefined;
         }
         const languages = Object.keys(LanguageCodeMap) as Language[];
 
-        return languages.find((language: Language) =>
+        const matchingLanguage = languages.find((language: Language) =>
             new RegExp(language).test(variableName)
         );
+
+        if (matchingLanguage == null) {
+            return undefined;
+        }
+
+        return LanguageCodeMap[matchingLanguage];
     },
     quoteEscape(value: string): string {
         const quote = `"`;

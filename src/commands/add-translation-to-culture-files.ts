@@ -79,7 +79,7 @@ const _addTranslationToFile = async (
     key: string,
     value: string
 ): Promise<OptionalKind<PropertyAssignmentStructure> | undefined> => {
-    const baseLanguage = SourceFileUtils.getBaseLanguage(file);
+    const languageCode = SourceFileUtils.getLanguageCode(file);
     const resourceObject = SourceFileUtils.getResourcesObject(file);
     if (resourceObject == null) {
         WindowUtils.errorResourcesNotFound(file);
@@ -92,7 +92,7 @@ const _addTranslationToFile = async (
         key,
         value,
         existingProperties,
-        baseLanguage
+        languageCode
     );
 
     const { insertionPosition } = ConfigUtils.get();
@@ -118,26 +118,22 @@ const _buildNewProperty = async (
     key: string,
     value: string,
     properties: ObjectLiteralElementLike[],
-    baseLanguage?: Identifier
+    toLanguage?: string
 ): Promise<OptionalKind<PropertyAssignmentStructure>> => {
-    const matchedLanguage = StringUtils.matchLanguageCode(
-        baseLanguage?.getText()
-    );
-
     const propertyAssignments = properties.filter(Node.isPropertyAssignment);
     const property: OptionalKind<PropertyAssignmentStructure> = {
         initializer: StringUtils.quoteEscape(value),
         name: StringUtils.quoteEscapeIfNeeded(key, propertyAssignments),
     };
 
-    if (matchedLanguage == null || matchedLanguage === LanguageCode.Default) {
+    if (toLanguage == null || toLanguage === LanguageCode.Default) {
         return property;
     }
 
     try {
         const translation = await StringUtils.translate(value, {
             from: LanguageCode.Default,
-            to: matchedLanguage,
+            to: toLanguage,
         });
 
         const translatedProperty = {
@@ -147,7 +143,7 @@ const _buildNewProperty = async (
         return translatedProperty;
     } catch (error) {
         WindowUtils.error(
-            `Error encountered attempting to translate to '${matchedLanguage}', using English copy instead - ${error}`
+            `Error encountered attempting to translate to '${toLanguage}', using English copy instead - ${error}`
         );
     }
 

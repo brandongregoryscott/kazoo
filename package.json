@@ -3,6 +3,7 @@
         "onCommand:kazoo.addKeyAndTranslation",
         "onCommand:kazoo.addKeyToInterface",
         "onCommand:kazoo.addTranslationToCultureFiles",
+        "onCommand:kazoo.intersectUntranslatedKeys",
         "onCommand:kazoo.removeKeyFromInterface",
         "onCommand:kazoo.removeTranslationFromCultureFiles",
         "onCommand:kazoo.replaceTranslationByKey",
@@ -31,6 +32,11 @@
                 "category": "kazoo",
                 "command": "kazoo.addTranslationToCultureFiles",
                 "title": "Add translation to culture files"
+            },
+            {
+                "category": "kazoo",
+                "command": "kazoo.intersectUntranslatedKeys",
+                "title": "Intersect untranslated keys with English translations"
             },
             {
                 "category": "kazoo",
