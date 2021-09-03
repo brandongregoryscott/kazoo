@@ -52,6 +52,17 @@ const SourceFileUtils = {
     },
 
     /**
+     * Returns all of the object literals in a file with all-string property assignments
+     */
+    getObjectLiteralsWithStringAssignments(
+        file: SourceFile
+    ): ObjectLiteralExpression[] {
+        return NodeUtils.findObjectLiteralExpressionWithStringAssignments(
+            file.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)
+        );
+    },
+
+    /**
      * Returns the inner `resources` object from the call expression initializer. Assumes the
      * `SourceFile` is in the expected structure.
      *

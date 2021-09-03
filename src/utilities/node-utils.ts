@@ -65,6 +65,18 @@ const findObjectLiteralExpressionWithProperty = (
         isObjectLiteralExpressionWithProperty(node, property)
     ) as ObjectLiteralExpression | undefined;
 
+const findObjectLiteralExpressionWithStringAssignments = (
+    nodes: Node[] | undefined
+): ObjectLiteralExpression[] => {
+    const isStringLiteral = (property: PropertyAssignment) =>
+        property.getInitializer()?.getType().isStringLiteral();
+    const objectLiterals = nodes?.filter(Node.isObjectLiteralExpression) ?? [];
+
+    return objectLiterals.filter((objectLiteral) =>
+        _.every(getPropertyAssignments(objectLiteral), isStringLiteral)
+    );
+};
+
 const getPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): PropertyAssignment[] =>
@@ -218,6 +230,7 @@ export const NodeUtils = {
     findIndex,
     findIdentifier,
     findObjectLiteralExpressionWithProperty,
+    findObjectLiteralExpressionWithStringAssignments,
     findPropertyIndexByName,
     findPropertyByName,
     getPropertyAssignments,

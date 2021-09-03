@@ -10,6 +10,7 @@ import { SourceFileUtils } from "../utilities/source-file-utils";
 import { StringUtils } from "../utilities/string-utils";
 import { SharedConstants } from "../constants/shared-constants";
 import { ConfigUtils } from "../utilities/config-utils";
+import _ from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -21,9 +22,20 @@ const replaceTranslationByKey = async (
 ) => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
-        const interfaceName = cultureInterface.getName();
         const interfaceProperties = cultureInterface.getProperties();
-        const propertyNames = PropertyUtils.getNames(interfaceProperties);
+        const cultureFiles = await ProjectUtils.getCultureFiles();
+        const cultureFileProperties = _.chain(cultureFiles)
+            .flatMap(SourceFileUtils.getObjectLiteralsWithStringAssignments)
+            .map(NodeUtils.getPropertyAssignments)
+            .flatMap()
+            .value();
+        const propertyNames = _.uniq(
+            PropertyUtils.getNames([
+                ...interfaceProperties,
+                ...cultureFileProperties,
+            ])
+        ).sort();
+
         if (key == null) {
             key = await WindowUtils.selection(
                 propertyNames,
@@ -38,18 +50,6 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        const existingProperty = NodeUtils.findPropertyByName(
-            key,
-            interfaceProperties
-        );
-        if (existingProperty == null) {
-            WindowUtils.info(
-                `Key '${key}' does not exist in ${interfaceName}.`
-            );
-            return;
-        }
-
-        const cultureFiles = await ProjectUtils.getCultureFiles();
         const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
 
         if (cultureFilePath == null) {
