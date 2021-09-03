@@ -153,7 +153,7 @@
         "build:dist": "npm run esbuild -- --minify",
         "build:test": "tsc --pretty",
         "clean": "rimraf dist tmp **/tmp/* **/*.txt **/*.log",
-        "esbuild": "node ./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
+        "esbuild": "./node_modules/esbuild/bin/esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --external:vscode",
         "lint": "eslint src --ext ts",
         "postvscode:publish": "git add -A && git commit -m \"$npm_package_version\" && git push origin main",
         "prebuild": "npm run clean",
