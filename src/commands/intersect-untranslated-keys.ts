@@ -5,9 +5,7 @@ import { CoreUtils } from "../utilities/core-utils";
 import { log } from "../utilities/log";
 import { NodeUtils } from "../utilities/node-utils";
 import { ProjectUtils } from "../utilities/project-utils";
-import { PropertyUtils } from "../utilities/property-utils";
 import { SourceFileUtils } from "../utilities/source-file-utils";
-import { StringUtils } from "../utilities/string-utils";
 import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
 import { PropertyAssignment } from "ts-morph";
@@ -68,8 +66,8 @@ const intersectUntranslatedKeys = async (cultureFilePath?: string) => {
             return;
         }
 
-        const untranslatedKeys = PropertyUtils.getNames(
-            NodeUtils.getPropertyAssignments(resources)
+        const untranslatedProperties = NodeUtils.getPropertyAssignments(
+            resources
         );
 
         const englishResources = SourceFileUtils.getResourcesObject(
@@ -82,14 +80,16 @@ const intersectUntranslatedKeys = async (cultureFilePath?: string) => {
 
         const englishProperties = NodeUtils.getPropertyAssignments(
             englishResources
-        ).filter((property) =>
-            untranslatedKeys.includes(
-                StringUtils.stripQuotes(property.getName())
-            )
+        );
+
+        const englishIntersection = _.intersectionBy(
+            englishProperties,
+            untranslatedProperties,
+            (property) => property.getName()
         );
 
         const document = await vscode.workspace.openTextDocument({
-            content: appendHeader(mapPropertiesToCsv(englishProperties)),
+            content: appendHeader(mapPropertiesToCsv(englishIntersection)),
         });
         await vscode.window.showTextDocument(document);
     } catch (error) {
@@ -108,8 +108,9 @@ const appendHeader = (value: string): string =>
 
 const mapPropertiesToCsv = (properties: Array<PropertyAssignment>): string =>
     properties
-        .map((property) =>
-            [property.getName(), property.getInitializer()?.getText()].join()
+        .map(
+            (property) =>
+                `${property.getName()},${property.getInitializer()?.getText()}`
         )
         .join("\n");
 
