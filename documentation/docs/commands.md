@@ -16,4 +16,4 @@ Click on one of the links below for more detailed information on usage for the s
 
 -   [Replace translations from file](commands/replace-translations-from-file)
 
-    -   Prompts the user to select a culture file to update with values from a JSON object in the same structure.
+    -   Prompts the user to select a culture file to update with values from a file.
