@@ -17,30 +17,11 @@
 
 VS Code extension to ease the burden of adding localized keys and strings to multiple typed culture files
 
-## Features
+![Add key to interface and translation to culture files](documentation/static/assets/examples/add-key-and-translation.gif)
 
--   Add key to interface
+## Documentation
 
-    -   Prompts the user for a key to add to the interface specified in the extension settings.
-
-![Add key to interface](examples/add-key-to-interface.gif)
-
--   Add key to interface and translation to culture files
-
-    -   Prompts the user for a key and translation to add to the interface and culture files specified in the extension settings.
-
-![Add key to interface and translation to culture files](examples/add-key-to-interface-and-translation-to-culture-files.gif)
-
--   Add translation to culture files
-    -   Prompts the user for a key and translation to add to each file specified in the extension settings.
-
-![Add translation to culture files](examples/add-translation-to-culture-files.gif)
-
--   Replace translations from JSON
-
-    -   Prompts the user to select a culture file to update with values from a JSON object in the same structure.
-
-![Replace translations from JSON](examples/replace-translations-from-json.gif)
+For more detailed documentation on commands and settings, check the [docs site](https://brandongregoryscott.github.io/kazoo) hosted on GitHub Pages.
 
 ## Requirements
 
