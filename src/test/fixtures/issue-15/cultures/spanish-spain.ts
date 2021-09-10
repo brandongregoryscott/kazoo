@@ -7,7 +7,9 @@ import {
 import { CultureResources } from "../interfaces/culture-resources";
 
 const ProfessionallyTranslatedSpanishSpain = {
-
+    "aboutApp": "Acerca de {{appName}}",
+    "acceptGroupInvitation-invitedByNameToJoin": "{{byName}} te invitó {{toJoin}}",
+    "acceptGroupInvitation-invitedToJoin": "Has sido invitado {{toJoin}}",
 };
 
 const SpanishSpain: Culture<CultureResources> = LocalizationUtils.cultureFactory<CultureResources>(BaseSpanishSpain, {
