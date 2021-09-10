@@ -5,11 +5,15 @@ import { CoreUtils } from "../utilities/core-utils";
 import { log } from "../utilities/log";
 import { Commands } from "../constants/commands";
 import { PropertyUtils } from "../utilities/property-utils";
-import { ObjectLiteralExpression, PropertyAssignment } from "ts-morph";
+import {
+    ObjectLiteralExpression,
+    PropertyAssignment,
+    SyntaxKind,
+} from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { StringUtils } from "../utilities/string-utils";
-import { SharedConstants } from "../constants/shared-constants";
 import { ConfigUtils } from "../utilities/config-utils";
+import _ from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -21,9 +25,20 @@ const replaceTranslationByKey = async (
 ) => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
-        const interfaceName = cultureInterface.getName();
         const interfaceProperties = cultureInterface.getProperties();
-        const propertyNames = PropertyUtils.getNames(interfaceProperties);
+        const cultureFiles = await ProjectUtils.getCultureFiles();
+        const cultureFileProperties = _.chain(cultureFiles)
+            .flatMap(SourceFileUtils.getObjectLiteralsWithStringAssignments)
+            .map(NodeUtils.getPropertyAssignments)
+            .flatMap()
+            .value();
+        const propertyNames = _.uniq(
+            PropertyUtils.getNames([
+                ...interfaceProperties,
+                ...cultureFileProperties,
+            ])
+        ).sort();
+
         if (key == null) {
             key = await WindowUtils.selection(
                 propertyNames,
@@ -38,18 +53,6 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        const existingProperty = NodeUtils.findPropertyByName(
-            key,
-            interfaceProperties
-        );
-        if (existingProperty == null) {
-            WindowUtils.info(
-                `Key '${key}' does not exist in ${interfaceName}.`
-            );
-            return;
-        }
-
-        const cultureFiles = await ProjectUtils.getCultureFiles();
         const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
 
         if (cultureFilePath == null) {
@@ -83,6 +86,10 @@ const replaceTranslationByKey = async (
         const objectLiteralWithProperty = NodeUtils.findObjectLiteralExpressionWithProperty(
             cultureFile.getDescendants(),
             key
+        );
+
+        const objectLiterals = SourceFileUtils.getObjectLiteralsWithStringAssignments(
+            cultureFile
         );
 
         const propertyAssignments = NodeUtils.getPropertyAssignments(
@@ -124,11 +131,7 @@ const replaceTranslationByKey = async (
 
         property.setInitializer(StringUtils.quoteEscape(updatedCopy));
 
-        await movePropertyIfRequested(
-            objectLiteralWithProperty ?? resources,
-            resources,
-            property
-        );
+        await movePropertyIfRequested(objectLiterals, property);
 
         await cultureFile.save();
 
@@ -146,33 +149,84 @@ const replaceTranslationByKey = async (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
+/**
+ * Formats an object literal's 'parent' node at the assignment delimiter, ie
+ *
+ * @example
+ * const ProfessionallyTranslatedSpanishSpain = { // <-- Displays 'ProfessionallyTranslatedSpanishSpain'
+ *  ...
+ * }
+ * // or...
+ * resources: { // <-- Displays 'resources'
+ *  ...
+ * }
+ */
+const formatObjectLiteralName = (
+    objectLiteral: ObjectLiteralExpression
+): string => {
+    const parentText = objectLiteral.getParent().getText();
+
+    const delimiters = ["=", ": {"];
+    const matchingDelimeter = delimiters.find((delimiter) =>
+        parentText.includes(delimiter)
+    );
+    if (matchingDelimeter != null) {
+        return parentText.split(matchingDelimeter)[0].trim();
+    }
+
+    return parentText;
+};
+
 const movePropertyIfRequested = async (
-    objectLiteral: ObjectLiteralExpression,
-    resources: ObjectLiteralExpression,
+    objectLiterals: ObjectLiteralExpression[],
     property: PropertyAssignment
 ) => {
     const key = StringUtils.stripQuotes(property.getName());
 
-    const copyUpdatedOutsideOfResourcesObject =
-        objectLiteral != null && objectLiteral !== resources;
-
-    if (!copyUpdatedOutsideOfResourcesObject) {
+    if (objectLiterals.length <= 1) {
         return;
     }
 
+    const parent = property.getParentIfKind(SyntaxKind.ObjectLiteralExpression);
+
+    if (parent == null) {
+        log.warn(
+            "Parent was unexpectedly null when attempting to prompt user for a move",
+            objectLiterals,
+            property
+        );
+        return;
+    }
+
+    const objectLiteralOptions = objectLiterals.filter(
+        (objectLiteral) => objectLiteral !== parent
+    );
+    const options = [
+        ...objectLiteralOptions.map(objectLiteralToSelectOption(key)),
+        `No, keep '${key}' where it is`,
+    ];
     const answer = await WindowUtils.selection(
-        [
-            `Yes, move '${key}' to the '${SharedConstants.RESOURCES}' object`,
-            `No, keep '${key}' where it is`,
-        ],
-        `Move this copy to the inline '${SharedConstants.RESOURCES}' object?`
+        options,
+        "Move this copy to another object?"
     );
 
     if (answer == null || !answer.includes("Yes")) {
         return;
     }
 
-    // Clone the property, remove it from the original object, and insert it into the 'resources' object
+    const indexOfObjectLiteral = options.indexOf(answer);
+    if (indexOfObjectLiteral < 0) {
+        log.warn(
+            "Unable to match up answer with available options",
+            options,
+            answer
+        );
+        return;
+    }
+
+    const selectedObjectLiteral = objectLiteralOptions[indexOfObjectLiteral];
+
+    // Clone the property, remove it from the original object, and insert it into the selected object
     const propertyStructure = property.getStructure();
     property.remove();
 
@@ -181,10 +235,17 @@ const movePropertyIfRequested = async (
     const index = NodeUtils.findIndex(
         insertionPosition,
         key,
-        resources.getProperties()
+        selectedObjectLiteral.getProperties()
     );
-    resources.insertPropertyAssignment(index, propertyStructure);
+    selectedObjectLiteral.insertPropertyAssignment(index, propertyStructure);
 };
+
+const objectLiteralToSelectOption = (key: string) => (
+    objectLiteral: ObjectLiteralExpression
+) =>
+    `Yes, move '${key}' to '${formatObjectLiteralName(
+        objectLiteral
+    )}' (Line ${objectLiteral.getStartLineNumber()})`;
 
 // #endregion Private Functions
 
