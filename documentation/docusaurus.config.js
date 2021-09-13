@@ -7,8 +7,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     title: "kazoo",
     tagline:
         "Ease the burden of adding localized keys and strings to multiple typed culture files",
-    url: "https://brandongregoryscott.github.io/kazoo",
-    baseUrl: "/",
+    url: "https://brandongregoryscott.github.io/",
+    baseUrl: "/kazoo/",
     onBrokenLinks: "throw",
     onBrokenMarkdownLinks: "warn",
     favicon: "assets/banner.png",
