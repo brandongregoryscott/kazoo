@@ -6,7 +6,7 @@ Generate a CSV with keys and English translations based on a culture file to sen
 
 ## Demo
 
-<!-- ![demo gif for 'Intersect untranslated keys' command](../../static/assets/examples/intersect-untranslated-keys.gif) -->
+![demo gif for 'Intersect untranslated keys' command](../../static/assets/examples/intersect-untranslated-keys.gif)
 
 ## Notes
 
