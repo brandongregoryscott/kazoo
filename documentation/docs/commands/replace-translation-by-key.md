@@ -6,7 +6,7 @@ Prompts the user to select a key to replace copy for in a specific culture file.
 
 ## Demo
 
-<!-- ![demo gif for 'Replace translation by key' command](../../static/assets/examples/replace-translation-by-key.gif) -->
+![demo gif for 'Replace translation by key' command](../../static/assets/examples/replace-translation-by-key.gif)
 
 ## Notes
 
