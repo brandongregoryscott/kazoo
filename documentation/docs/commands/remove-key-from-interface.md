@@ -6,7 +6,7 @@ Prompts the user for a key to remove from the project's culture interface.
 
 ## Demo
 
-<!-- ![demo gif for 'Remove key from interface' command](../../static/assets/examples/remove-key-from-interface.gif) -->
+![demo gif for 'Remove key from interface' command](../../static/assets/examples/remove-key-from-interface.gif)
 
 ## Related settings
 
