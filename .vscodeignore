@@ -10,7 +10,8 @@
 **/*.ts
 **/test/*
 **/tsconfig.json
-assets/icon.png
+documentation/**
+!documentation/static/assets/banner.png
 esbuild.js
 examples/**
 node_modules
