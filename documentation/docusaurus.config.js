@@ -35,6 +35,9 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     themeConfig:
         /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
         ({
+            colorMode: {
+                defaultMode: "dark",
+            },
             navbar: {
                 title: "Home",
                 logo: {
@@ -43,16 +46,78 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 },
                 items: [
                     {
-                        type: "doc",
+                        type: "dropdown",
                         docId: "commands",
                         position: "left",
                         label: "Commands",
+                        items: [
+                            {
+                                type: "doc",
+                                label: "Add key to interface",
+                                docId: "commands/add-key-to-interface",
+                            },
+                            {
+                                type: "doc",
+                                label: "Add key and translation",
+                                docId: "commands/add-key-and-translation",
+                            },
+                            {
+                                type: "doc",
+                                label: "Add translation to culture files",
+                                docId:
+                                    "commands/add-translation-to-culture-files",
+                            },
+                            {
+                                type: "doc",
+                                label: "Intersect untranslated keys",
+                                docId: "commands/intersect-untranslated-keys",
+                            },
+                            {
+                                type: "doc",
+                                label: "Remove key from interface",
+                                docId: "commands/remove-key-from-interface",
+                            },
+                            {
+                                type: "doc",
+                                label: "Remove translation from culture files",
+                                docId:
+                                    "commands/remove-translation-from-culture-files",
+                            },
+                            {
+                                type: "doc",
+                                label: "Replace translation by key",
+                                docId: "commands/replace-translation-by-key",
+                            },
+                            {
+                                type: "doc",
+                                label: "Replace translations from file",
+                                docId:
+                                    "commands/replace-translations-from-file",
+                            },
+                        ],
                     },
                     {
-                        type: "doc",
+                        type: "dropdown",
                         docId: "settings",
                         position: "left",
                         label: "Settings",
+                        items: [
+                            {
+                                type: "doc",
+                                label: "cultureFilePaths",
+                                docId: "settings/culture-file-paths",
+                            },
+                            {
+                                type: "doc",
+                                label: "cultureInterfacePath",
+                                docId: "settings/culture-interface-path",
+                            },
+                            {
+                                type: "doc",
+                                label: "insertionPosition",
+                                docId: "settings/insertion-position",
+                            },
+                        ],
                     },
                     {
                         type: "doc",
