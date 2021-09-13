@@ -10,8 +10,8 @@ Prompts the user for a key and translation to add to the interface and culture f
 
 ## Related settings
 
--   The interface is determined by the path or glob pattern specified in the extension's [settings](settings/culture-interface-path).
+-   The interface is determined by the path or glob pattern specified in the extension's [settings](../settings/culture-interface-path).
 
--   The culture files are determined by the path(s) or glob pattern(s) specified in the extension's [settings](settings/culture-file-paths).
+-   The culture files are determined by the path(s) or glob pattern(s) specified in the extension's [settings](../settings/culture-file-paths).
 
--   The key's position is determined by the `InsertionPosition` strategy specified [settings](settings/insertion-position).
+-   The key's position is determined by the `InsertionPosition` strategy specified [settings](../settings/insertion-position).

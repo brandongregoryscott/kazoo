@@ -10,4 +10,4 @@ Prompts the user for a key to remove from the project's culture interface.
 
 ## Related settings
 
--   The interface is determined by the path or glob pattern specified in the extension's [settings](settings/culture-interface-path).
+-   The interface is determined by the path or glob pattern specified in the extension's [settings](../settings/culture-interface-path).

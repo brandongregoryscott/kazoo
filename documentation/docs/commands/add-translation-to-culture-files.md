@@ -10,6 +10,6 @@ Prompts the user for a key and translation to add to each culture file.
 
 ## Related settings
 
--   The culture files are determined by the path(s) or glob pattern(s) specified in the extension's [settings](settings/culture-file-paths).
+-   The culture files are determined by the path(s) or glob pattern(s) specified in the extension's [settings](../settings/culture-file-paths).
 
--   The key's position is determined by the `InsertionPosition` strategy specified [settings](settings/insertion-position).
+-   The key's position is determined by the `InsertionPosition` strategy specified [settings](../settings/insertion-position).

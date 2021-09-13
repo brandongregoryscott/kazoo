@@ -10,6 +10,6 @@ Prompts the user for a key to add to project's culture interface.
 
 ## Related settings
 
--   The interface is determined by the path or glob pattern specified in the extension's [settings](settings/culture-interface-path).
+-   The interface is determined by the path or glob pattern specified in the extension's [settings](../settings/culture-interface-path).
 
--   The key's position in the interface is determined by the `InsertionPosition` strategy specified [settings](settings/insertion-position).
+-   The key's position in the interface is determined by the `InsertionPosition` strategy specified [settings](../settings/insertion-position).
