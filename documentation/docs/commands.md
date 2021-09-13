@@ -18,6 +18,18 @@ Click on one of the links below for more detailed information on usage for the s
 
     -   Generate a CSV with keys and English translations based on a culture file to send off for professional translation.
 
+-   [Remove key from interface](commands/remove-key-from-interface)
+
+    -   Prompts the user for a key to remove from the project's culture interface.
+
+-   [Remove translation from culture files](commands/remove-translation-from-culture-files)
+
+    -   Prompts the user for a key to remove from the project's culture files.
+
+-   [Replace translation by key](commands/replace-translation-by-key)
+
+    -   Prompts the user to select a key to replace copy for in a specific culture file.
+
 -   [Replace translations from file](commands/replace-translations-from-file)
 
     -   Prompts the user to select a culture file to update with values from a file.

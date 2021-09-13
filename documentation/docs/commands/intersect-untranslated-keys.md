@@ -34,6 +34,8 @@ const SpanishSpain: Culture<CultureResources> = LocalizationUtils.cultureFactory
 );
 ```
 
+-   The CSV file that is opened in VS Code is not initially saved anywhere. You can copy/paste this into Excel manually, or save the file and give it a name/location as usual.
+
 ## Related settings
 
 -   The culture files are determined by the path(s) or glob pattern(s) specified in the extension's [settings](settings/culture-file-paths).
