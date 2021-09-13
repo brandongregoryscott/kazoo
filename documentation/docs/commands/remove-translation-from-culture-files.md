@@ -6,7 +6,7 @@ Prompts the user for a key to remove from the project's culture files.
 
 ## Demo
 
-<!-- ![demo gif for 'Remove translation from culture files' command](../../static/assets/examples/remove-translation-from-culture-files.gif) -->
+![demo gif for 'Remove translation from culture files' command](../../static/assets/examples/remove-translation-from-culture-files.gif)
 
 ## Notes
 
