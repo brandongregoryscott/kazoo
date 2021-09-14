@@ -1,8 +1,11 @@
-# Settings > `insertionPosition`
+# Settings > Insertion Position
 
 ## Overview
 
 Controls the position to insert key/translation into files.
+
+-   Type: `enum`
+-   Key (in `settings.json`): `kazoo.insertionPosition`
 
 ## Options
 

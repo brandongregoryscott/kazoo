@@ -104,17 +104,17 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                         items: [
                             {
                                 type: "doc",
-                                label: "cultureFilePaths",
+                                label: "Culture File Paths",
                                 docId: "settings/culture-file-paths",
                             },
                             {
                                 type: "doc",
-                                label: "cultureInterfacePath",
+                                label: "Culture Interface Path",
                                 docId: "settings/culture-interface-path",
                             },
                             {
                                 type: "doc",
-                                label: "insertionPosition",
+                                label: "Insertion Position",
                                 docId: "settings/insertion-position",
                             },
                         ],
@@ -133,8 +133,39 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 ],
             },
             footer: {
-                style: "dark",
                 links: [
+                    {
+                        title: "Documentation",
+                        items: [
+                            {
+                                label: "Commands",
+                                to: "docs/commands",
+                            },
+                            {
+                                label: "Settings",
+                                to: "docs/settings",
+                            },
+                            {
+                                label: "Troubleshooting",
+                                to: "docs/troubleshooting",
+                            },
+                        ],
+                    },
+                    {
+                        title: "External References",
+                        items: [
+                            {
+                                label: "AndcultureCode i18n Wiki",
+                                to:
+                                    "https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core/wiki/Internationalization-(i18n)",
+                            },
+                            {
+                                label: "Glob Pattern Tester",
+                                to:
+                                    "https://www.digitalocean.com/community/tools/glob",
+                            },
+                        ],
+                    },
                     {
                         title: "More",
                         items: [
