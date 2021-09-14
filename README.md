@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/brandongregoryscott/kazoo/main/assets/banner.png" width="50%" height="50%"/>
+    <img src="https://raw.githubusercontent.com/brandongregoryscott/kazoo/main/documentation/static/assets/banner.png" width="50%" height="50%"/>
     <br/>
     <a href="https://github.com/brandongregoryscott/kazoo/actions/workflows/build.yaml">
         <img alt="build status" src="https://github.com/brandongregoryscott/kazoo/actions/workflows/build.yaml/badge.svg"/>
