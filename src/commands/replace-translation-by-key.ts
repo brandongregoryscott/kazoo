@@ -1,4 +1,4 @@
-import { WindowUtils } from "../utilities/window-utils";
+import { SelectionOption, WindowUtils } from "../utilities/window-utils";
 import { ProjectUtils } from "../utilities/project-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import { CoreUtils } from "../utilities/core-utils";
@@ -201,30 +201,22 @@ const movePropertyIfRequested = async (
     const objectLiteralOptions = objectLiterals.filter(
         (objectLiteral) => objectLiteral !== parent
     );
-    const options = [
+    const options: Array<
+        SelectionOption<ObjectLiteralExpression | undefined>
+    > = [
         ...objectLiteralOptions.map(objectLiteralToSelectOption(key)),
-        `No, keep '${key}' where it is`,
+        { text: `No, keep '${key}' where it is`, value: undefined },
     ];
-    const answer = await WindowUtils.selection(
+    const answer = await WindowUtils.selectionWithValue(
         options,
         "Move this copy to another object?"
     );
 
-    if (answer == null || !answer.includes("Yes")) {
+    if (answer?.value == null) {
         return;
     }
 
-    const indexOfObjectLiteral = options.indexOf(answer);
-    if (indexOfObjectLiteral < 0) {
-        log.warn(
-            "Unable to match up answer with available options",
-            options,
-            answer
-        );
-        return;
-    }
-
-    const selectedObjectLiteral = objectLiteralOptions[indexOfObjectLiteral];
+    const { value: selectedObjectLiteral } = answer;
 
     // Clone the property, remove it from the original object, and insert it into the selected object
     const propertyStructure = property.getStructure();
@@ -242,10 +234,12 @@ const movePropertyIfRequested = async (
 
 const objectLiteralToSelectOption = (key: string) => (
     objectLiteral: ObjectLiteralExpression
-) =>
-    `Yes, move '${key}' to '${formatObjectLiteralName(
+): SelectionOption<ObjectLiteralExpression | undefined> => ({
+    text: `Yes, move '${key}' to '${formatObjectLiteralName(
         objectLiteral
-    )}' (Line ${objectLiteral.getStartLineNumber()})`;
+    )}' (Line ${objectLiteral.getStartLineNumber()})`,
+    value: objectLiteral,
+});
 
 // #endregion Private Functions
 
