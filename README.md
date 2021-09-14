@@ -4,7 +4,7 @@
     <a href="https://github.com/brandongregoryscott/kazoo/actions/workflows/build.yaml">
         <img alt="build status" src="https://github.com/brandongregoryscott/kazoo/actions/workflows/build.yaml/badge.svg"/>
     </a>
-    <a href="vscode:extension/brandongregoryscott.kazoo">
+    <a href="https://marketplace.visualstudio.com/items?itemName=brandongregoryscott.kazoo">
         <img alt="Visual Studio Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/brandongregoryscott.kazoo.svg?style=flat-square"/>
     </a>
     <a href="https://github.com/prettier/prettier">
