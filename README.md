@@ -49,6 +49,8 @@ const EnglishUnitedStates: Culture<CultureResources> = LocalizationUtils.culture
 );
 ```
 
+See the [AndcultureCode wiki page](<https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core/wiki/Internationalization-(i18n)>) for more information on setting up internationalization in TypeScript.
+
 ## How it works
 
 This extension leverages [`ts-morph`](https://github.com/dsherret/ts-morph) under the hood to read & manipulate the TypeScript AST. This means that you don't need the interface or culture files open in your VS Code window for it to perform the manipulations.
@@ -56,14 +58,3 @@ This extension leverages [`ts-morph`](https://github.com/dsherret/ts-morph) unde
 > It also means that it manipulates the files from their saved versions on disk - if you have open but unsaved changes in your editor, it's going to yell at you when you try to save because the file on disk will be newer than the version in your editor.
 
 For translating non-English copy, the extension leverages [`@vitalets/google-translate-api`](https://github.com/vitalets/google-translate-api), determining which language to translate to based on the base culture being extended from [`andculturecode-javascript-core`](https://github.com/AndcultureCode/AndcultureCode.JavaScript.Core) (currently supporting Spanish, but can be easily updated).
-
-## Settings
-
-This extension supports the following configuration settings:
-
--   `kazoo.cultureFilePaths`: Array of paths/glob patterns to culture files
-    -   Default: `**/cultures/*.ts`
--   `kazoo.cultureInterfacePath`: Path/glob pattern to interface defining typed i18n keys
-    -   Default: `**/interfaces/culture-resources.ts`
--   `kazoo.insertionPosition`: Position to insert key/translation into file
-    -   Default: `Loose Alphabetical` (Inserts key in best guess alphabetical order, assuming file is already sorted)
