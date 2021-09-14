@@ -1,19 +1,8 @@
-.github/**
-.gitignore
-.prettierignore
-.vscode-test/**
-.vscode/**
-.yarnrc
-*.test.ts
-**/.eslintrc.json
-**/*.map
-**/*.ts
-**/test/*
-**/tsconfig.json
-assets/icon.png
-esbuild.js
-examples/**
-node_modules
-src/**
-vsc-extension-quickstart.md
-*.txt
+**/*
+
+; Includes
+!dist/extension.js
+!documentation/static/assets/banner.png
+!LICENSE
+!package.json
+!README.md

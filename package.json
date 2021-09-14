@@ -131,7 +131,7 @@
     "engines": {
         "vscode": "^1.54.0"
     },
-    "icon": "assets/banner.png",
+    "icon": "documentation/static/assets/banner.png",
     "keywords": [
         "i18n",
         "l10n",

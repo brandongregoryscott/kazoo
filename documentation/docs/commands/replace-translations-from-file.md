@@ -6,7 +6,9 @@ Prompts the user to select a culture file to update with values from a file.
 
 ## Demo
 
-![demo gif for 'Replace translations from file' command](../../static/assets/examples/replace-translations-from-json.gif)
+![demo gif for 'Replace translations from file' command using a json file](../../static/assets/examples/replace-translations-from-json-file.gif)
+
+![demo gif for 'Replace translations from file' command using an Excel file](../../static/assets/examples/replace-translations-from-xlsx-file.gif)
 
 ## Notes
 
