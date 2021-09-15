@@ -19,14 +19,12 @@ import _ from "lodash";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const replaceTranslationByKey = async (
-    key?: string,
-    cultureFilePath?: string
-) => {
+const replaceTranslationByKey = async (key?: string) => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
         const interfaceProperties = cultureInterface.getProperties();
         const cultureFiles = await ProjectUtils.getCultureFiles();
+        const cultureFileOptions = await ProjectUtils.getCultureFileSelectOptions();
         const cultureFileProperties = _.chain(cultureFiles)
             .flatMap(SourceFileUtils.getObjectLiteralsWithStringAssignments)
             .map(NodeUtils.getPropertyAssignments)
@@ -53,21 +51,11 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
-
-        if (cultureFilePath == null) {
-            cultureFilePath = await WindowUtils.selection(cultureFilePaths);
-        }
-
-        if (cultureFilePath == null) {
-            log.debug("No cultureFilePath entered - not continuing.");
-            return;
-        }
-
-        const cultureFile = SourceFileUtils.findByFilePath(
-            cultureFiles,
-            cultureFilePath
+        const cultureFileSelection = await WindowUtils.selectionWithValue(
+            cultureFileOptions
         );
+        const { value: cultureFile, text: cultureFilePath } =
+            cultureFileSelection ?? {};
 
         if (cultureFile == null) {
             log.warn(
@@ -167,11 +155,11 @@ const formatObjectLiteralName = (
     const parentText = objectLiteral.getParent().getText();
 
     const delimiters = ["=", ": {"];
-    const matchingDelimeter = delimiters.find((delimiter) =>
+    const matchingDelimiter = delimiters.find((delimiter) =>
         parentText.includes(delimiter)
     );
-    if (matchingDelimeter != null) {
-        return parentText.split(matchingDelimeter)[0].trim();
+    if (matchingDelimiter != null) {
+        return parentText.split(matchingDelimiter)[0].trim();
     }
 
     return parentText;

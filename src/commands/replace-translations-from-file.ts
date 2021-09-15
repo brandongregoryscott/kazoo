@@ -1,5 +1,5 @@
 import { ProjectUtils } from "../utilities/project-utils";
-import { WindowUtils } from "../utilities/window-utils";
+import { SelectionOption, WindowUtils } from "../utilities/window-utils";
 import * as fs from "fs";
 import { FileUtils } from "../utilities/file-utils";
 import { SourceFile } from "ts-morph";
@@ -11,6 +11,8 @@ import readXlsxFile from "read-excel-file";
 import { StringUtils } from "../utilities/string-utils";
 import { log } from "../utilities/log";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
+import upath from "upath";
+import { WorkspaceUtils } from "../utilities/workspace-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -27,17 +29,18 @@ const ERROR_UPDATING_CULTURE_FILE =
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const replaceTranslationsFromFile = async (
-    cultureFilePath?: string,
-    inputFilePath?: string
-) => {
+const replaceTranslationsFromFile = async () => {
     try {
-        const cultureFile = await _getCultureFileToUpdate(cultureFilePath);
+        const cultureFileOptions = await ProjectUtils.getCultureFileSelectOptions();
+        const cultureFile = (
+            await WindowUtils.selectionWithValue(cultureFileOptions)
+        )?.value;
         if (cultureFile == null) {
+            log.debug("No cultureFile entered - not continuing.");
             return;
         }
 
-        const translations = await _getTranslationsFromFile(inputFilePath);
+        const translations = await _getTranslationsFromFile();
         if (translations == null) {
             return;
         }
@@ -76,49 +79,25 @@ const replaceTranslationsFromFile = async (
 const _formatUpdateResult = (result: UpdatePropertiesResult): string =>
     `Updated: ${result.updated.length} Unmodified: ${result.unmodified.length} Not found: ${result.notFound.length}`;
 
-const _getCultureFileToUpdate = async (
-    cultureFilePath?: string
-): Promise<SourceFile | undefined> => {
-    const cultureFiles = await ProjectUtils.getCultureFiles();
-    const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
-
-    if (cultureFilePath == null) {
-        cultureFilePath = await WindowUtils.selection(cultureFilePaths);
-    }
-
-    if (cultureFilePath == null) {
-        log.debug("No cultureFilePath entered - not continuing.");
-        return;
-    }
-
-    const cultureFile = cultureFiles.find(
-        (file) => file.getFilePath() === cultureFilePath
-    );
-
-    if (cultureFile == null) {
-        log.warn(
-            "cultureFile was unexpectedly null",
-            cultureFilePath,
-            cultureFile
-        );
-        return;
-    }
-
-    return cultureFile;
-};
-
-const _getTranslationsFromFile = async (
-    inputFilePath?: string
-): Promise<Record<string, string> | undefined> => {
-    const inputFiles = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
-    if (inputFiles.length < 1) {
+const _getTranslationsFromFile = async (): Promise<
+    Record<string, string> | undefined
+> => {
+    const inputFilePaths = await FileUtils.findAll(["**/*.xlsx", "**/*.json"]);
+    if (inputFilePaths.length < 1) {
         WindowUtils.error(ERROR_NO_SUPPORTED_FILES_FOUND);
         return;
     }
 
-    if (inputFilePath == null) {
-        inputFilePath = await WindowUtils.selection(inputFiles);
-    }
+    const inputFileOptions: Array<SelectionOption<string>> = inputFilePaths.map(
+        (inputFilePath) => ({
+            text: upath.relative(WorkspaceUtils.getFolder(), inputFilePath),
+            value: inputFilePath,
+        })
+    );
+
+    const inputFilePath = (
+        await WindowUtils.selectionWithValue(inputFileOptions)
+    )?.value;
 
     if (inputFilePath == null) {
         log.debug("No inputFilePath entered - not continuing.");
@@ -141,7 +120,12 @@ const _parseFile = async (
 
         return _sanitizedParsedValues(parsedValues);
     } catch (error) {
-        WindowUtils.error(error);
+        if (error instanceof Error) {
+            WindowUtils.error(error.message);
+            return;
+        }
+
+        WindowUtils.error((error as any).toString());
     }
 };
 

@@ -1,8 +1,9 @@
 import { InterfaceDeclaration, Project, SourceFile } from "ts-morph";
 import { ConfigUtils } from "./config-utils";
-import { WindowUtils } from "./window-utils";
+import { SelectionOption, WindowUtils } from "./window-utils";
 import { FileUtils } from "./file-utils";
 import { Language } from "../enums/language";
+import { SourceFileUtils } from "./source-file-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Variables
@@ -42,6 +43,13 @@ const getCultureFiles = async (): Promise<SourceFile[]> => {
     const files = _project.getSourceFiles(paths);
     await Promise.all(files.map((file) => file.refreshFromFileSystem()));
     return files;
+};
+
+const getCultureFileSelectOptions = async (): Promise<
+    Array<SelectionOption<SourceFile>>
+> => {
+    const cultureFiles = await getCultureFiles();
+    return SourceFileUtils.toSelectOptions(cultureFiles);
 };
 
 const getCultureInterface = async (): Promise<InterfaceDeclaration> =>
@@ -129,6 +137,7 @@ export const ProjectUtils = {
     get,
     getCultureFileByLanguage,
     getCultureFiles,
+    getCultureFileSelectOptions,
     getCultureInterface,
     getCultureInterfaceFile,
     initializeFromConfig,

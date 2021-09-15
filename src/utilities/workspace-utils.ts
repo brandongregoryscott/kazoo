@@ -5,8 +5,8 @@ import * as vscode from "vscode";
 // -----------------------------------------------------------------------------------------
 
 const WorkspaceUtils = {
-    getFolder(): string | undefined {
-        return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    getFolder(): string {
+        return vscode.workspace.workspaceFolders?.[0].uri.fsPath!;
     },
 };
 
