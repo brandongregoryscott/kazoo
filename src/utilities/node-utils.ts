@@ -77,6 +77,34 @@ const findObjectLiteralExpressionWithStringAssignments = (
     );
 };
 
+/**
+ * Formats an object literal's 'parent' node at the assignment delimiter, ie
+ *
+ * @example
+ * const ProfessionallyTranslatedSpanishSpain = { // <-- Displays 'ProfessionallyTranslatedSpanishSpain'
+ *  ...
+ * }
+ * // or...
+ * resources: { // <-- Displays 'resources'
+ *  ...
+ * }
+ */
+const formatObjectLiteral = (literal: ObjectLiteralExpression): string => {
+    const parentText = literal.getParent().getText();
+
+    const delimiters = ["=", ": {"];
+    const matchingDelimiter = delimiters.find((delimiter) =>
+        parentText.includes(delimiter)
+    );
+
+    const lineNumber = `(Line ${literal.getStartLineNumber()})`;
+    if (matchingDelimiter != null) {
+        return `${parentText.split(matchingDelimiter)[0].trim()} ${lineNumber}`;
+    }
+
+    return `${parentText} ${lineNumber}`;
+};
+
 const getPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): PropertyAssignment[] =>
@@ -233,6 +261,7 @@ export const NodeUtils = {
     findObjectLiteralExpressionWithStringAssignments,
     findPropertyIndexByName,
     findPropertyByName,
+    formatObjectLiteral,
     getPropertyAssignments,
     getNameOrText,
     isObjectLiteralExpressionWithProperty,

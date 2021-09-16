@@ -137,34 +137,6 @@ const replaceTranslationByKey = async (key?: string) => {
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-/**
- * Formats an object literal's 'parent' node at the assignment delimiter, ie
- *
- * @example
- * const ProfessionallyTranslatedSpanishSpain = { // <-- Displays 'ProfessionallyTranslatedSpanishSpain'
- *  ...
- * }
- * // or...
- * resources: { // <-- Displays 'resources'
- *  ...
- * }
- */
-const formatObjectLiteralName = (
-    objectLiteral: ObjectLiteralExpression
-): string => {
-    const parentText = objectLiteral.getParent().getText();
-
-    const delimiters = ["=", ": {"];
-    const matchingDelimiter = delimiters.find((delimiter) =>
-        parentText.includes(delimiter)
-    );
-    if (matchingDelimiter != null) {
-        return parentText.split(matchingDelimiter)[0].trim();
-    }
-
-    return parentText;
-};
-
 const movePropertyIfRequested = async (
     objectLiterals: ObjectLiteralExpression[],
     property: PropertyAssignment
@@ -223,9 +195,9 @@ const movePropertyIfRequested = async (
 const objectLiteralToSelectOption = (key: string) => (
     objectLiteral: ObjectLiteralExpression
 ): SelectionOption<ObjectLiteralExpression | undefined> => ({
-    text: `Yes, move '${key}' to '${formatObjectLiteralName(
+    text: `Yes, move '${key}' to ${NodeUtils.formatObjectLiteral(
         objectLiteral
-    )}' (Line ${objectLiteral.getStartLineNumber()})`,
+    )}`,
     value: objectLiteral,
 });
 

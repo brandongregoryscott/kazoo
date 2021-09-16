@@ -2,7 +2,12 @@ import { ProjectUtils } from "../utilities/project-utils";
 import { SelectionOption, WindowUtils } from "../utilities/window-utils";
 import * as fs from "fs";
 import { FileUtils } from "../utilities/file-utils";
-import { SourceFile } from "ts-morph";
+import {
+    ObjectLiteralExpression,
+    PropertyAssignment,
+    SourceFile,
+    SyntaxKind,
+} from "ts-morph";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import _ from "lodash";
@@ -13,6 +18,7 @@ import { log } from "../utilities/log";
 import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 import upath from "upath";
 import { WorkspaceUtils } from "../utilities/workspace-utils";
+import { ConfigUtils } from "../utilities/config-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -128,6 +134,89 @@ const _parseFile = async (
         WindowUtils.error((error as any).toString());
     }
 };
+
+const movePropertiesIfRequested = async (
+    objectLiterals: ObjectLiteralExpression[],
+    properties: PropertyAssignment[]
+) => {
+    if (objectLiterals.length <= 1 || properties.length) {
+        return;
+    }
+
+    const parent = properties[0].getParentIfKind(
+        SyntaxKind.ObjectLiteralExpression
+    );
+
+    if (parent == null) {
+        log.warn(
+            "Parent was unexpectedly null when attempting to prompt user for a move",
+            objectLiterals,
+            properties[0]
+        );
+        return;
+    }
+
+    let propertyNames = `'${NodeUtils.getNameOrText(properties[0])}'`;
+    if (properties.length > 3) {
+        propertyNames = `'${_.take(properties, 3)
+            .map(NodeUtils.getNameOrText)
+            .join(", ")}' and ${properties.length - 3} more...`;
+    }
+
+    const objectLiteralOptions = objectLiterals.filter(
+        (objectLiteral) => objectLiteral !== parent
+    );
+    const options: Array<
+        SelectionOption<ObjectLiteralExpression | undefined>
+    > = [
+        ...objectLiteralOptions.map(objectLiteralToSelectOption(propertyNames)),
+        {
+            text: `No, keep ${propertyNames} where ${
+                properties.length === 1 ? "it is" : "they are"
+            }`,
+            value: undefined,
+        },
+    ];
+    const answer = await WindowUtils.selectionWithValue(
+        options,
+        "Move this copy to another object?"
+    );
+
+    if (answer?.value == null) {
+        return;
+    }
+
+    const { value: selectedObjectLiteral } = answer;
+
+    // Clone the property, remove it from the original object, and insert it into the selected object
+    const propertyStructures = properties.map((property) =>
+        property.getStructure()
+    );
+    properties.forEach((property) => property.remove());
+
+    const { insertionPosition } = ConfigUtils.get();
+
+    propertyStructures.forEach((propertyStructure) => {
+        const index = NodeUtils.findIndex(
+            insertionPosition,
+            propertyStructure.name,
+            selectedObjectLiteral.getProperties()
+        );
+        selectedObjectLiteral.insertPropertyAssignment(
+            index,
+            propertyStructure
+        );
+    });
+};
+
+const objectLiteralToSelectOption = (propertyNames: string) => (
+    objectLiteral: ObjectLiteralExpression
+): SelectionOption<ObjectLiteralExpression | undefined> => ({
+    text: `Yes, move ${propertyNames} to ${NodeUtils.formatObjectLiteral(
+        objectLiteral
+    )}`,
+    value: objectLiteral,
+});
 
 const _replaceTranslations = async (
     translations: Record<string, string>,
