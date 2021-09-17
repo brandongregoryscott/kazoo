@@ -222,27 +222,69 @@ const _replaceTranslations = async (
     translations: Record<string, string>,
     file: SourceFile
 ): Promise<UpdatePropertiesResult | undefined> => {
-    const resourceObject = SourceFileUtils.getResourcesObject(file);
-    if (resourceObject == null) {
+    const objectLiterals = SourceFileUtils.getObjectLiteralsWithStringAssignments(
+        file
+    );
+    if (objectLiterals.length === 0) {
         WindowUtils.errorResourcesNotFound(file);
         return;
     }
 
-    const existingProperties = NodeUtils.getPropertyAssignments(resourceObject);
-    const updatedProperties = NodeUtils.mapToPropertyAssignments(
-        translations,
-        existingProperties
-    );
+    let aggregatedUpdateResult: UpdatePropertiesResult = {
+        notFound: [],
+        unmodified: [],
+        updated: [],
+    };
+    objectLiterals.forEach((objectLiteral) => {
+        const existingProperties = NodeUtils.getPropertyAssignments(
+            objectLiteral
+        );
+        const updatedProperties = NodeUtils.mapToPropertyAssignments(
+            translations,
+            existingProperties
+        );
 
-    const updateResult = NodeUtils.updateProperties(
-        existingProperties,
-        updatedProperties
-    );
+        const updateResult = NodeUtils.updateProperties(
+            existingProperties,
+            updatedProperties
+        );
+
+        aggregatedUpdateResult = _recursiveMerge(
+            aggregatedUpdateResult,
+            updateResult
+        );
+    });
 
     await file.save();
 
-    return updateResult;
+    return _sanitizeUpdateResult(aggregatedUpdateResult);
 };
+
+const _recursiveMerge = <TDestination, TSource>(
+    destination: TDestination,
+    source: TSource
+): TDestination & TSource =>
+    _.mergeWith(destination, source, (destinationValue: any, srcValue: any) =>
+        _.isArray(destinationValue)
+            ? destinationValue.concat(srcValue)
+            : undefined
+    );
+
+/**
+ * Because properties may exist in different objects, and we're merging the update results, do a final
+ * sanitization step to remove properties from 'notFound' that exist in 'unmodified' or 'updated',
+ * since that means they were eventually found.
+ */
+const _sanitizeUpdateResult = (
+    updateResult: UpdatePropertiesResult
+): UpdatePropertiesResult =>
+    _recursiveMerge(updateResult, {
+        notFound: _.difference(
+            updateResult.notFound,
+            updateResult.unmodified,
+            updateResult.updated
+        ),
+    });
 
 const _sanitizedParsedValues = (
     object: Record<string, string>
