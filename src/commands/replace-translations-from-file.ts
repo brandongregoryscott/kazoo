@@ -19,6 +19,7 @@ import { UpdatePropertiesResult } from "../interfaces/update-properties-result";
 import upath from "upath";
 import { WorkspaceUtils } from "../utilities/workspace-utils";
 import { ConfigUtils } from "../utilities/config-utils";
+import { PropertyUtils } from "../utilities/property-utils";
 
 // -----------------------------------------------------------------------------------------
 // #region Constants
@@ -267,10 +268,16 @@ const _replaceTranslations = async (
             updateResult
         );
 
+        const propertiesToMove = _.intersectionWith(
+            existingProperties,
+            updateResult.updated,
+            PropertyUtils.compareByName
+        );
+
         await movePropertiesIfRequested(
             parent,
             objectLiterals,
-            existingProperties
+            propertiesToMove
         );
     }
 

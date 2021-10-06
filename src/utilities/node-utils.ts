@@ -199,7 +199,7 @@ const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existingProperties = getPropertyAssignments(literal);
-    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertyAssignment>(
+    const sortedProperties = PropertyUtils.sortByName<PropertyAssignment>(
         existingProperties
     ).map((property) => property.getStructure());
     existingProperties.forEach((existing) => existing.remove());
@@ -211,13 +211,13 @@ const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
     const existingProperties = _interface.getProperties();
-    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertySignature>(
+    const sortedProperties = PropertyUtils.sortByName<PropertySignature>(
         existingProperties
     );
 
     existingProperties.forEach((existing: PropertySignature) => {
         const sortedIndex = sortedProperties.findIndex(
-            PropertyUtils.comparePropertyByName(existing)
+            _.curry(PropertyUtils.compareByName)(existing)
         );
 
         if (sortedIndex < 0) {
