@@ -118,7 +118,7 @@ const movePropertiesIfRequested = async (
     objectLiterals: ObjectLiteralExpression[],
     properties: PropertyAssignment[]
 ) => {
-    if (objectLiterals.length <= 1) {
+    if (objectLiterals.length <= 1 || properties.length < 1) {
         return;
     }
 
@@ -132,13 +132,17 @@ const movePropertiesIfRequested = async (
     }
 
     const propertyDisplayLimit = 2;
-    let propertyNames = properties.map(NodeUtils.getNameOrText).join(", ");
-    if (properties.length > propertyDisplayLimit) {
-        const trimmedPropertyNames = _.take(properties, propertyDisplayLimit)
-            .map(NodeUtils.getNameOrText)
-            .join(", ");
+    const overDisplayLimit = properties.length > propertyDisplayLimit;
+    let propertyNames = _.take(
+        properties,
+        overDisplayLimit ? propertyDisplayLimit : properties.length
+    )
+        .map(NodeUtils.getNameOrText)
+        .map(StringUtils.quoteEscape)
+        .join(", ");
+    if (overDisplayLimit) {
         const remainingCount = properties.length - propertyDisplayLimit;
-        propertyNames = `${trimmedPropertyNames} and ${remainingCount} more...`;
+        propertyNames = `${propertyNames} and ${remainingCount} more...`;
     }
 
     const objectLiteralOptions = objectLiterals.filter(
