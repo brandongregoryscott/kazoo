@@ -249,7 +249,7 @@ const _replaceTranslations = async (
             updatedProperties
         );
 
-        aggregatedUpdateResult = _recursiveMerge(
+        aggregatedUpdateResult = _mergeResult(
             aggregatedUpdateResult,
             updateResult
         );
@@ -257,34 +257,30 @@ const _replaceTranslations = async (
 
     await file.save();
 
-    return _sanitizeUpdateResult(aggregatedUpdateResult);
+    return aggregatedUpdateResult;
 };
 
-const _recursiveMerge = <TDestination, TSource>(
-    destination: TDestination,
-    source: TSource
-): TDestination & TSource =>
-    _.mergeWith(destination, source, (destinationValue: any, srcValue: any) =>
-        _.isArray(destinationValue)
-            ? destinationValue.concat(srcValue)
-            : undefined
-    );
+const _mergeResult = (
+    destination: UpdatePropertiesResult,
+    source: UpdatePropertiesResult
+) => {
+    const merged: UpdatePropertiesResult = {
+        ...destination,
+        updated: _.union(destination.updated, source.updated),
+    };
 
-/**
- * Because properties may exist in different objects, and we're merging the update results, do a final
- * sanitization step to remove properties from 'notFound' that exist in 'unmodified' or 'updated',
- * since that means they were eventually found.
- */
-const _sanitizeUpdateResult = (
-    updateResult: UpdatePropertiesResult
-): UpdatePropertiesResult =>
-    _recursiveMerge(updateResult, {
-        notFound: _.difference(
-            updateResult.notFound,
-            updateResult.unmodified,
-            updateResult.updated
-        ),
-    });
+    merged.unmodified = _.chain(merged.unmodified)
+        .union(source.unmodified)
+        .difference(merged.updated)
+        .value();
+
+    merged.notFound = _.chain(merged.notFound)
+        .union(source.notFound)
+        .difference(merged.updated, merged.unmodified)
+        .value();
+
+    return merged;
+};
 
 const _sanitizedParsedValues = (
     object: Record<string, string>
