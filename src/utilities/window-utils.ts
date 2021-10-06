@@ -11,6 +11,11 @@ interface MessageOption {
     onSelection: (value: string) => void;
 }
 
+interface SelectionOption<T = any> {
+    text: string;
+    value: T;
+}
+
 // #endregion Interfaces
 
 // -----------------------------------------------------------------------------------------
@@ -62,6 +67,17 @@ const WindowUtils = {
             ignoreFocusOut: true,
         });
     },
+    async selectionWithValue<T>(
+        options: Array<SelectionOption<T>>,
+        placeHolder?: string
+    ): Promise<SelectionOption<T> | undefined> {
+        const selected = await this.selection(
+            options.map((e) => e.text),
+            placeHolder
+        );
+
+        return options.find((e) => e.text === selected);
+    },
     warning(value: string, ...options: MessageOption[]): void {
         showMessage(vscode.window.showWarningMessage)(value, ...options);
     },
@@ -105,6 +121,6 @@ const showMessage = (
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { MessageOption, WindowUtils };
+export { MessageOption, SelectionOption, WindowUtils };
 
 // #endregion Exports

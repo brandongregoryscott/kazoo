@@ -1,4 +1,4 @@
-import { WindowUtils } from "../utilities/window-utils";
+import { SelectionOption, WindowUtils } from "../utilities/window-utils";
 import { ProjectUtils } from "../utilities/project-utils";
 import { NodeUtils } from "../utilities/node-utils";
 import { CoreUtils } from "../utilities/core-utils";
@@ -19,14 +19,12 @@ import _ from "lodash";
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const replaceTranslationByKey = async (
-    key?: string,
-    cultureFilePath?: string
-) => {
+const replaceTranslationByKey = async (key?: string) => {
     try {
         const cultureInterface = await ProjectUtils.getCultureInterface();
         const interfaceProperties = cultureInterface.getProperties();
         const cultureFiles = await ProjectUtils.getCultureFiles();
+        const cultureFileOptions = await ProjectUtils.getCultureFileSelectOptions();
         const cultureFileProperties = _.chain(cultureFiles)
             .flatMap(SourceFileUtils.getObjectLiteralsWithStringAssignments)
             .map(NodeUtils.getPropertyAssignments)
@@ -53,21 +51,11 @@ const replaceTranslationByKey = async (
             return;
         }
 
-        const cultureFilePaths = cultureFiles.map((file) => file.getFilePath());
-
-        if (cultureFilePath == null) {
-            cultureFilePath = await WindowUtils.selection(cultureFilePaths);
-        }
-
-        if (cultureFilePath == null) {
-            log.debug("No cultureFilePath entered - not continuing.");
-            return;
-        }
-
-        const cultureFile = SourceFileUtils.findByFilePath(
-            cultureFiles,
-            cultureFilePath
+        const cultureFileSelection = await WindowUtils.selectionWithValue(
+            cultureFileOptions
         );
+        const { value: cultureFile, text: cultureFilePath } =
+            cultureFileSelection ?? {};
 
         if (cultureFile == null) {
             log.warn(
@@ -149,34 +137,6 @@ const replaceTranslationByKey = async (
 // #region Private Functions
 // -----------------------------------------------------------------------------------------
 
-/**
- * Formats an object literal's 'parent' node at the assignment delimiter, ie
- *
- * @example
- * const ProfessionallyTranslatedSpanishSpain = { // <-- Displays 'ProfessionallyTranslatedSpanishSpain'
- *  ...
- * }
- * // or...
- * resources: { // <-- Displays 'resources'
- *  ...
- * }
- */
-const formatObjectLiteralName = (
-    objectLiteral: ObjectLiteralExpression
-): string => {
-    const parentText = objectLiteral.getParent().getText();
-
-    const delimiters = ["=", ": {"];
-    const matchingDelimeter = delimiters.find((delimiter) =>
-        parentText.includes(delimiter)
-    );
-    if (matchingDelimeter != null) {
-        return parentText.split(matchingDelimeter)[0].trim();
-    }
-
-    return parentText;
-};
-
 const movePropertyIfRequested = async (
     objectLiterals: ObjectLiteralExpression[],
     property: PropertyAssignment
@@ -201,30 +161,22 @@ const movePropertyIfRequested = async (
     const objectLiteralOptions = objectLiterals.filter(
         (objectLiteral) => objectLiteral !== parent
     );
-    const options = [
+    const options: Array<
+        SelectionOption<ObjectLiteralExpression | undefined>
+    > = [
         ...objectLiteralOptions.map(objectLiteralToSelectOption(key)),
-        `No, keep '${key}' where it is`,
+        { text: `No, keep '${key}' where it is`, value: undefined },
     ];
-    const answer = await WindowUtils.selection(
+    const answer = await WindowUtils.selectionWithValue(
         options,
         "Move this copy to another object?"
     );
 
-    if (answer == null || !answer.includes("Yes")) {
+    if (answer?.value == null) {
         return;
     }
 
-    const indexOfObjectLiteral = options.indexOf(answer);
-    if (indexOfObjectLiteral < 0) {
-        log.warn(
-            "Unable to match up answer with available options",
-            options,
-            answer
-        );
-        return;
-    }
-
-    const selectedObjectLiteral = objectLiteralOptions[indexOfObjectLiteral];
+    const { value: selectedObjectLiteral } = answer;
 
     // Clone the property, remove it from the original object, and insert it into the selected object
     const propertyStructure = property.getStructure();
@@ -242,10 +194,12 @@ const movePropertyIfRequested = async (
 
 const objectLiteralToSelectOption = (key: string) => (
     objectLiteral: ObjectLiteralExpression
-) =>
-    `Yes, move '${key}' to '${formatObjectLiteralName(
+): SelectionOption<ObjectLiteralExpression | undefined> => ({
+    text: `Yes, move '${key}' to ${NodeUtils.formatObjectLiteral(
         objectLiteral
-    )}' (Line ${objectLiteral.getStartLineNumber()})`;
+    )}`,
+    value: objectLiteral,
+});
 
 // #endregion Private Functions
 

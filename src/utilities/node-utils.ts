@@ -77,6 +77,34 @@ const findObjectLiteralExpressionWithStringAssignments = (
     );
 };
 
+/**
+ * Formats an object literal's 'parent' node at the assignment delimiter, ie
+ *
+ * @example
+ * const ProfessionallyTranslatedSpanishSpain = { // <-- Displays 'ProfessionallyTranslatedSpanishSpain'
+ *  ...
+ * }
+ * // or...
+ * resources: { // <-- Displays 'resources'
+ *  ...
+ * }
+ */
+const formatObjectLiteral = (literal: ObjectLiteralExpression): string => {
+    const parentText = literal.getParent().getText();
+
+    const delimiters = ["=", ": {"];
+    const matchingDelimiter = delimiters.find((delimiter) =>
+        parentText.includes(delimiter)
+    );
+
+    const lineNumber = `(Line ${literal.getStartLineNumber()})`;
+    if (matchingDelimiter != null) {
+        return `${parentText.split(matchingDelimiter)[0].trim()} ${lineNumber}`;
+    }
+
+    return `${parentText} ${lineNumber}`;
+};
+
 const getPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): PropertyAssignment[] =>
@@ -171,7 +199,7 @@ const sortPropertyAssignments = (
     literal: ObjectLiteralExpression
 ): ObjectLiteralExpression => {
     const existingProperties = getPropertyAssignments(literal);
-    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertyAssignment>(
+    const sortedProperties = PropertyUtils.sortByName<PropertyAssignment>(
         existingProperties
     ).map((property) => property.getStructure());
     existingProperties.forEach((existing) => existing.remove());
@@ -183,13 +211,13 @@ const sortPropertySignatures = (
     _interface: InterfaceDeclaration
 ): InterfaceDeclaration => {
     const existingProperties = _interface.getProperties();
-    const sortedProperties = PropertyUtils.sortPropertiesByName<PropertySignature>(
+    const sortedProperties = PropertyUtils.sortByName<PropertySignature>(
         existingProperties
     );
 
     existingProperties.forEach((existing: PropertySignature) => {
         const sortedIndex = sortedProperties.findIndex(
-            PropertyUtils.comparePropertyByName(existing)
+            _.curry(PropertyUtils.compareByName)(existing)
         );
 
         if (sortedIndex < 0) {
@@ -233,6 +261,7 @@ export const NodeUtils = {
     findObjectLiteralExpressionWithStringAssignments,
     findPropertyIndexByName,
     findPropertyByName,
+    formatObjectLiteral,
     getPropertyAssignments,
     getNameOrText,
     isObjectLiteralExpressionWithProperty,

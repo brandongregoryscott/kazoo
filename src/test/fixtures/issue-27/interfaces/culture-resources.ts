@@ -1,21 +1,21 @@
-import * as vscode from "vscode";
-
 // -----------------------------------------------------------------------------------------
-// #region Public Functions
+// #region Interfaces
 // -----------------------------------------------------------------------------------------
 
-const WorkspaceUtils = {
-    getFolder(): string {
-        return vscode.workspace.workspaceFolders?.[0].uri.fsPath!;
-    },
-};
+interface CultureResources {
+    accountInformation: string;
+    cancelMySubscription: string;
+    checkOutFaq: string;
+    subscriptionDetails: string;
+    teamManagement: string;
+}
 
-// #endregion Public Functions
+// #endregion Interfaces
 
 // -----------------------------------------------------------------------------------------
 // #region Exports
 // -----------------------------------------------------------------------------------------
 
-export { WorkspaceUtils };
+export { CultureResources };
 
 // #endregion Exports

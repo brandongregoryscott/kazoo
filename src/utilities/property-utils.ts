@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Property } from "../types/property";
 import { StringUtils } from "./string-utils";
 
@@ -6,26 +7,32 @@ import { StringUtils } from "./string-utils";
 // -----------------------------------------------------------------------------------------
 
 const PropertyUtils = {
-    comparePropertyByName: (a: Property) => (b: Property) =>
-        StringUtils.stripQuotes(a.getName()) ===
-        StringUtils.stripQuotes(b.getName()),
+    compareByName: (a: Property | string, b: Property | string) => {
+        return stripQuotes(a) === stripQuotes(b);
+    },
 
-    getNames: (properties: Property[]): string[] =>
-        properties.map((property) =>
-            StringUtils.stripQuotes(property.getName())
-        ),
+    getNames: (properties: Property[]): string[] => properties.map(stripQuotes),
 
-    sortPropertiesByName: <TProperty extends Property = Property>(
+    sortByName: <TProperty extends Property = Property>(
         properties: Property[]
     ): TProperty[] =>
         properties.sort((a, b) =>
-            StringUtils.stripQuotes(a.getName()).localeCompare(
-                StringUtils.stripQuotes(b.getName())
-            )
+            stripQuotes(a).localeCompare(stripQuotes(b))
         ) as TProperty[],
 };
 
 // #endregion Public Functions
+
+// -----------------------------------------------------------------------------------------
+// #region Private Functions
+// -----------------------------------------------------------------------------------------
+
+const stripQuotes = (property: Property | string) =>
+    StringUtils.stripQuotes(
+        _.isString(property) ? property : property.getName()
+    );
+
+// #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
 // #region Exports

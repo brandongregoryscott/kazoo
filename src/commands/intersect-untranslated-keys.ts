@@ -8,18 +8,19 @@ import { ProjectUtils } from "../utilities/project-utils";
 import { SourceFileUtils } from "../utilities/source-file-utils";
 import { WindowUtils } from "../utilities/window-utils";
 import * as vscode from "vscode";
-import { PropertyAssignment } from "ts-morph";
+import { PropertyAssignment, SourceFile } from "ts-morph";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
 // -----------------------------------------------------------------------------------------
 
-const intersectUntranslatedKeys = async (cultureFilePath?: string) => {
+const intersectUntranslatedKeys = async () => {
     try {
         const cultureFiles = await ProjectUtils.getCultureFiles();
-        const cultureFilePaths = SourceFileUtils.filterByNonEnglish(
-            cultureFiles
-        ).map((file) => file.getFilePath());
+        const cultureFileOptions = SourceFileUtils.toSelectOptions(
+            SourceFileUtils.filterByNonEnglish(cultureFiles)
+        );
+
         const englishCultureFile = await ProjectUtils.getCultureFileByLanguage(
             Language.English
         );
@@ -32,30 +33,16 @@ const intersectUntranslatedKeys = async (cultureFilePath?: string) => {
             return;
         }
 
-        if (cultureFilePath == null) {
-            cultureFilePath = await WindowUtils.selection(
-                cultureFilePaths,
+        const cultureFile = (
+            await WindowUtils.selectionWithValue(
+                cultureFileOptions,
                 "Select a culture file to intersect"
-            );
-        }
-
-        if (cultureFilePath == null) {
-            log.debug(
-                `cultureFilePath was not entered from prompt in ${Commands.intersectUntranslatedKeys}`
-            );
-            return;
-        }
-
-        const cultureFile = SourceFileUtils.findByFilePath(
-            cultureFiles,
-            cultureFilePath
-        );
+            )
+        )?.value;
 
         if (cultureFile == null) {
-            log.warn(
-                "cultureFile was unexpectedly null",
-                cultureFilePath,
-                cultureFile
+            log.debug(
+                `cultureFile was not entered from prompt in ${Commands.intersectUntranslatedKeys}`
             );
             return;
         }

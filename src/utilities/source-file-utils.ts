@@ -9,6 +9,10 @@ import { SharedConstants } from "../constants/shared-constants";
 import { LanguageCode } from "../enums/language-code";
 import { NodeUtils } from "./node-utils";
 import { StringUtils } from "./string-utils";
+import { SelectionOption } from "./window-utils";
+import upath from "upath";
+import { WorkspaceUtils } from "./workspace-utils";
+import _ from "lodash";
 
 // -----------------------------------------------------------------------------------------
 // #region Public Functions
@@ -81,6 +85,12 @@ const SourceFileUtils = {
 
         return resourceObject;
     },
+
+    toSelectOptions(
+        files: Array<SourceFile>
+    ): Array<SelectionOption<SourceFile>> {
+        return files.map(_toSelectOption);
+    },
 };
 
 // #endregion Public Functions
@@ -101,6 +111,17 @@ const _getInitializerArgs = (file: SourceFile): Node[] => {
             ?.getArguments() ?? []
     );
 };
+
+const _toSelectOption = (file: SourceFile): SelectionOption<SourceFile> => {
+    const path = upath.relative(WorkspaceUtils.getFolder(), file.getFilePath());
+    const language = SourceFileUtils.getLanguageIdentifier(file)?.getText();
+    const text = _.compact([language, `(${path})`]).join(" ");
+    return {
+        text,
+        value: file,
+    };
+};
+
 // #endregion Private Functions
 
 // -----------------------------------------------------------------------------------------
