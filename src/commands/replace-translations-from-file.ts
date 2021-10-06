@@ -113,39 +113,14 @@ const _getTranslationsFromFile = async (): Promise<
     return _parseFile(inputFilePath);
 };
 
-const _parseFile = async (
-    filePath: string
-): Promise<Record<string, string> | undefined> => {
-    try {
-        const fileContents = fs.readFileSync(filePath);
-        const parsedValues: Record<string, string> = StringUtils.isJsonFile(
-            filePath
-        )
-            ? JSON.parse(fileContents.toString())
-            : _.fromPairs(await readXlsxFile(fileContents));
-
-        return _sanitizedParsedValues(parsedValues);
-    } catch (error) {
-        if (error instanceof Error) {
-            WindowUtils.error(error.message);
-            return;
-        }
-
-        WindowUtils.error((error as any).toString());
-    }
-};
-
 const movePropertiesIfRequested = async (
+    parent: ObjectLiteralExpression,
     objectLiterals: ObjectLiteralExpression[],
     properties: PropertyAssignment[]
 ) => {
-    if (objectLiterals.length <= 1 || properties.length) {
+    if (objectLiterals.length <= 1) {
         return;
     }
-
-    const parent = properties[0].getParentIfKind(
-        SyntaxKind.ObjectLiteralExpression
-    );
 
     if (parent == null) {
         log.warn(
@@ -156,11 +131,14 @@ const movePropertiesIfRequested = async (
         return;
     }
 
-    let propertyNames = `'${NodeUtils.getNameOrText(properties[0])}'`;
-    if (properties.length > 3) {
-        propertyNames = `'${_.take(properties, 3)
+    const propertyDisplayLimit = 2;
+    let propertyNames = properties.map(NodeUtils.getNameOrText).join(", ");
+    if (properties.length > propertyDisplayLimit) {
+        const trimmedPropertyNames = _.take(properties, propertyDisplayLimit)
             .map(NodeUtils.getNameOrText)
-            .join(", ")}' and ${properties.length - 3} more...`;
+            .join(", ");
+        const remainingCount = properties.length - propertyDisplayLimit;
+        propertyNames = `${trimmedPropertyNames} and ${remainingCount} more...`;
     }
 
     const objectLiteralOptions = objectLiterals.filter(
@@ -218,6 +196,28 @@ const objectLiteralToSelectOption = (propertyNames: string) => (
     value: objectLiteral,
 });
 
+const _parseFile = async (
+    filePath: string
+): Promise<Record<string, string> | undefined> => {
+    try {
+        const fileContents = fs.readFileSync(filePath);
+        const parsedValues: Record<string, string> = StringUtils.isJsonFile(
+            filePath
+        )
+            ? JSON.parse(fileContents.toString())
+            : _.fromPairs(await readXlsxFile(fileContents));
+
+        return _sanitizedParsedValues(parsedValues);
+    } catch (error) {
+        if (error instanceof Error) {
+            WindowUtils.error(error.message);
+            return;
+        }
+
+        WindowUtils.error((error as any).toString());
+    }
+};
+
 const _replaceTranslations = async (
     translations: Record<string, string>,
     file: SourceFile
@@ -235,10 +235,19 @@ const _replaceTranslations = async (
         unmodified: [],
         updated: [],
     };
-    objectLiterals.forEach((objectLiteral) => {
-        const existingProperties = NodeUtils.getPropertyAssignments(
-            objectLiteral
-        );
+
+    const objectLiteralsWithAssignments: Array<{
+        parent: ObjectLiteralExpression;
+        existingProperties: Array<PropertyAssignment>;
+    }> = objectLiterals.map((objectLiteral) => ({
+        parent: objectLiteral,
+        existingProperties: NodeUtils.getPropertyAssignments(objectLiteral),
+    }));
+
+    for (const {
+        parent,
+        existingProperties,
+    } of objectLiteralsWithAssignments) {
         const updatedProperties = NodeUtils.mapToPropertyAssignments(
             translations,
             existingProperties
@@ -253,7 +262,13 @@ const _replaceTranslations = async (
             aggregatedUpdateResult,
             updateResult
         );
-    });
+
+        await movePropertiesIfRequested(
+            parent,
+            objectLiterals,
+            existingProperties
+        );
+    }
 
     await file.save();
 
